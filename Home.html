@@ -25,10 +25,15 @@
 <div class="nav-icons">
   <img src="Favorites.png" style="width:24px;height:24px;" alt="Favorites">
 
-  <div class="nav-cart" id="navCart" style="margin-left:16px;">
+  <div class="nav-cart" style="margin-left:16px;">
     <img src="Cart.png" style="width:24px;height:24px;" alt="Cart">
     <span id="cartCount" class="cart-badge">0</span>
   </div>
+
+  
+  <div class="nav-user" id="navUser" style="margin-left:16px;cursor:pointer;">
+  <img src="User.png" style="width:24px;height:24px;" alt="User">
+</div>
 </div>
   <button class="nav-burger" type="button" style="margin-right:24px;">
     <img src="Burger.png" style="width:40px;height:40px;" alt="menu">
@@ -89,7 +94,7 @@
 <div id="bannerBottomGrid"></div>
 </div>
 <div class="Categories">
-  <h1 style="font-size: 24px;margin:0px ;margin-left:16px;color:black">Browse By Category</h1>
+  <h1 style="font-size: 24px;margin-left:16px;margin-bottom:32px;color:black">Browse By Category</h1>
    <!-- 
   <div class="CategoryTop">  
     
@@ -382,10 +387,32 @@
                 </div>
     </div>
   </div>
+  <div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-backdrop" data-close="1"></div>
+
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal-head">
+      <h3 id="loginTitle" style="margin:0;">Sign in</h3>
+      <button class="modal-x" type="button" data-close="1" aria-label="Close">×</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="modal-label">Email</label>
+      <input id="loginEmail" class="modal-input" type="email" placeholder="you@example.com">
+
+      <label class="modal-label">Password</label>
+      <input id="loginPass" class="modal-input" type="password" placeholder="••••••••">
+
+      <button id="loginBtn" class="modal-btn" type="button">Login</button>
+      <p id="loginMsg" style="margin:12px 0 0 0;font-size:12px;opacity:.8;"></p>
+    </div>
+  </div>
+</div>
   <script src="data.js"></script>
 <script src="app.js">
   
 </script>
+
 </body>
 
 
