@@ -43,7 +43,7 @@ function setupLoginModal() {
   function openModal() {
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
-    msg && (msg.textContent = "");
+    if (msg) msg.textContent = "";
     if (emailEl) emailEl.value = "";
     if (passEl) passEl.value = "";
     setTimeout(() => emailEl?.focus(), 0);
@@ -73,7 +73,6 @@ function setupLoginModal() {
     }
   }
 
-  // icon click
   navUser.addEventListener("click", () => {
     const user = getUser();
     if (!user) openModal();
@@ -85,7 +84,6 @@ function setupLoginModal() {
     }
   });
 
-  // close click
   modal.addEventListener("click", (e) => {
     if (e.target?.dataset?.close) closeModal();
   });
@@ -94,7 +92,6 @@ function setupLoginModal() {
     if (e.key === "Escape") closeModal();
   });
 
-  // login btn
   btn?.addEventListener("click", () => {
     const email = (emailEl?.value || "").trim();
     const pass = (passEl?.value || "").trim();
@@ -123,8 +120,9 @@ async function renderAll() {
   const categoriesGrid = document.getElementById("CategoriesGrid");
   const bigBannerWrapperGrid = document.getElementById("bigBannerWrapperGrid");
   const mainBanner = document.getElementById("mainBanner");
+  const productPageGrid = document.getElementById("productPageGrid");
 
-  // products
+  // products (Home)
   if (productsGrid) {
     const data = await getJSON("https://dummyjson.com/products?limit=8");
     productsGrid.innerHTML = data.products.map(p => `
@@ -146,7 +144,7 @@ async function renderAll() {
     `).join("");
   }
 
-  // discount
+  // discount (Home)
   if (discountGrid) {
     const data2 = await getJSON("https://dummyjson.com/products?limit=4&skip=8");
     discountGrid.innerHTML = data2.products.map(p => `
@@ -166,7 +164,7 @@ async function renderAll() {
     `).join("");
   }
 
-  // banner bottom
+  // banner bottom (Home)
   if (bannerBottomGrid) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=4");
     const p = data.products || [];
@@ -198,12 +196,29 @@ async function renderAll() {
     `;
   }
 
-  // categories
+  // categories (Home)
   if (categoriesGrid) {
-    const data3 = await getJSON("https://dummyjson.com/products/categories");
-    const normalize = (c) => (typeof c === "string" ? { slug: c, name: c } : { slug: c.slug || c.name || "", name: c.name || c.slug || "" });
-    const all = data3.map(normalize);
+    // ✅ click eventi sadece 1 kere ekle
+    if (!categoriesGrid.dataset.bound) {
+      categoriesGrid.addEventListener("click", (e) => {
+        const card = e.target.closest(".category-card");
+        if (!card) return;
 
+        const slug = card.dataset.cat;
+        if (!slug) return;
+
+        window.location.href = `ProductPage.html?category=${encodeURIComponent(slug)}`;
+      });
+      categoriesGrid.dataset.bound = "1";
+    }
+
+    const data3 = await getJSON("https://dummyjson.com/products/categories");
+    const normalize = (c) =>
+      (typeof c === "string")
+        ? { slug: c, name: c }
+        : { slug: c.slug || c.name || "", name: c.name || c.slug || "" };
+
+    const all = data3.map(normalize);
     const wantedSlugs = ["beauty","fragrances","skin-care","sunglasses","womens-bags","womens-jewellery"];
 
     async function getCategoryIcon(slug) {
@@ -221,35 +236,29 @@ async function renderAll() {
     for (let i = 0; i < list.length; i += 2) {
       const left = list[i];
       const right = list[i + 1];
+
       const leftIcon = await getCategoryIcon(left.slug);
-      const rightIcon = await getCategoryIcon(right.slug);
+      const rightIcon = right ? await getCategoryIcon(right.slug) : "";
 
-      categoriesGrid.addEventListener("click", (e) => {
-  const card = e.target.closest(".category-card");
-  if (!card) return;
+      categoriesGrid.innerHTML += `
+        <div class="CategoryItem">
+          <div class="CategoryItemTop category-card" data-cat="${left.slug}">
+            <img src="${leftIcon}" style="width:48px;height:48px;" alt="${left.name}">
+            <h1 style="font-size:16px;margin:0;color:black">${String(left.name).split("-").join(" ")}</h1>
+          </div>
 
-  const slug = card.dataset.cat;
-  if (!slug) return;
-
-  window.location.href = `ProductPage.html?category=${encodeURIComponent(slug)}`;
-});
-     categoriesGrid.innerHTML += `
-  <div class="CategoryItem">
-    <div class="CategoryItemTop category-card" data-cat="${left.slug}">
-      <img src="${leftIcon}" style="width:48px;height:48px;" alt="${left.name}">
-      <h1 style="font-size:16px;margin:0;color:black">${String(left.name).split("-").join(" ")}</h1>
-    </div>
-
-    <div class="CategoryItemTop category-card" data-cat="${right.slug}">
-      <img src="${rightIcon}" style="width:48px;height:48px;" alt="${right.name}">
-      <h1 style="font-size:16px;margin:0;color:black">${String(right.name).split("-").join(" ")}</h1>
-    </div>
-  </div>
-`;
+          ${right ? `
+          <div class="CategoryItemTop category-card" data-cat="${right.slug}">
+            <img src="${rightIcon}" style="width:48px;height:48px;" alt="${right.name}">
+            <h1 style="font-size:16px;margin:0;color:black">${String(right.name).split("-").join(" ")}</h1>
+          </div>
+          ` : ""}
+        </div>
+      `;
     }
   }
 
-  // big banners
+  // big banners (Home)
   if (bigBannerWrapperGrid) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=4");
     const p = data.products || [];
@@ -264,7 +273,6 @@ async function renderAll() {
           <button style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">Shop Now</button>
         </div>
       </div>
-
       <div class="bigBanner bigBanner-desktop-only">
         <div class="Halfimage"><img src="${p[0].thumbnail}" style="width:360px; height:327px;" alt="${p[0].title}"></div>
         <div class="bigBannerText">
@@ -273,7 +281,6 @@ async function renderAll() {
           <button style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">Shop Now</button>
         </div>
       </div>
-
       <div class="bigBanner bigBanner-desktop-only">
         <div class="Halfimage"><img src="${p[1].thumbnail}" style="width:360px; height:360px;" alt="${p[1].title}"></div>
         <div class="bigBannerText">
@@ -282,7 +289,6 @@ async function renderAll() {
           <button style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">Shop Now</button>
         </div>
       </div>
-
       <div class="bigBanner bigBanner-desktop-only">
         <div class="Halfimage"><img src="${p[2].thumbnail}" style="width:360px; height:360px;" alt="${p[2].title}"></div>
         <div class="bigBannerText">
@@ -291,7 +297,6 @@ async function renderAll() {
           <button style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">Shop Now</button>
         </div>
       </div>
-
       <div class="bigBanner bigBanner-desktop-only bigBanner-dark">
         <div class="Halfimage"><img src="${p[3].thumbnail}" style="width:340px; height:356px;" alt="${p[3].title}"></div>
         <div class="bigBannerText">
@@ -303,7 +308,7 @@ async function renderAll() {
     `;
   }
 
-  // main banner
+  // main banner (Home)
   if (mainBanner) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=1");
     const p = data.products?.[0];
@@ -327,14 +332,58 @@ async function renderAll() {
       </div>
     `;
   }
+
+  // ✅ ProductPage ürünleri (ProductPage.html)
+  if (productPageGrid) {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get("category") || "Beauty";
+
+      const data = await getJSON(`https://dummyjson.com/products/category/${encodeURIComponent(category)}?limit=12`);
+      const products = data.products || [];
+
+      let html = "";
+      for (let i = 0; i < products.length; i += 2) {
+        const left = products[i];
+        const right = products[i + 1];
+
+        html += `
+          <div class="ProductResultItems">
+            <div class="productResultItemIphone">
+              <img src="${left.thumbnail}" style="width:104px;height:104px;" alt="${left.title}">
+              <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${left.title}</h2>
+              <p style="font-size:24px;color:black;margin:0;">$${left.price}</p>
+              <button data-product-id="${left.id}"
+                style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
+                Buy Now
+              </button>
+            </div>
+
+            ${right ? `
+            <div class="productResultItemIphone">
+              <img src="${right.thumbnail}" style="width:104px;height:104px;" alt="${right.title}">
+              <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${right.title}</h2>
+              <p style="font-size:24px;color:black;margin:0;">$${right.price}</p>
+              <button data-product-id="${right.id}"
+                style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
+                Buy Now
+              </button>
+            </div>
+            ` : ""}
+          </div>
+        `;
+      }
+
+      productPageGrid.innerHTML = html;
+    } catch (err) {
+      console.error("❌ ProductPage fetch error:", err);
+    }
+  }
 }
 
 // ---------- global click handlers ----------
 function setupClicks() {
-  // all buttons should show hand
-  document.body.style.cursor = "default";
-
-  // add-to-cart
+  // add-to-cart (Buy Now)
   document.body.addEventListener("click", (e) => {
     const button = e.target.closest("button[data-product-id]");
     if (!button) return;
@@ -357,5 +406,9 @@ function setupClicks() {
 document.addEventListener("DOMContentLoaded", async () => {
   setupLoginModal();
   setupClicks();
-  try { await renderAll(); } catch (e) { console.error(e); }
+  try {
+    await renderAll();
+  } catch (e) {
+    console.error(e);
+  }
 });

@@ -474,14 +474,17 @@ border-radius: 8px;
   
 }
                 
-.ProductResult{
+
+  .ProductResult{
   width: 100%;
-  box-sizing: border-box;
+  max-width: 1120px;
+  margin: 0 auto;
   padding: 16px;
-  display: flex;
-  flex-direction: column;   
-  align-items: center;
-   gap: 16px; 
+  box-sizing: border-box;
+
+  /* flex/grid verme, wrapper kalsın */
+  display: block;
+
 }
 
 .ProductResultItems{
@@ -1717,6 +1720,23 @@ input[type="submit"]:active{
   transform: scale(0.97);
 }
 
+
+#productPageGrid{
+  
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+ 
+}
+
+
+
+
+#productPageGrid > *{
+  min-width: 0; /* taşmayı keser */
+}
+
 @media (min-width: 1024px) {
   
   .banner{
@@ -1839,11 +1859,9 @@ input[type="submit"]:active{
     }
 
 .ProductResult {
-    max-width: 1120px;
-    margin: 32px auto;
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
+    max-width: none;
+    margin: 0;
+    padding: 0;
   }
 
   .ProductResultItems {
@@ -2000,9 +2018,15 @@ input[type="submit"]:active{
   }
   .ProductResultDesktop {
     width: 100%;
-    display: flex;
-    align-items: space-between;
-    flex-direction: row;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 80px; /* istersen 0 yap */
+    box-sizing: border-box;
+
+    display: grid;
+    grid-template-columns: 341px 1fr; /* sol sidebar + sağ içerik */
+    gap: 32px;
+    align-items: start;
   
 }
 .productPageFiltersBuiltMemory{
@@ -2479,7 +2503,11 @@ input[type="submit"]:active{
     grid-template-columns: repeat(4, 1fr);
   }
 
-
+   #productPageGrid{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 24px;
+  }
 }
 
 
