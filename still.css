@@ -50,32 +50,58 @@ body {
 .nav-icons {
   display: none;
 }
-
+.nav-links a.active{
+  font-weight: 600;
+  color: #000;
+  border-bottom: 2px solid #000;
+  padding-bottom: 4px;
+}
 .banner{
   width: 100%;
-  height: 769px;      
+  background: #211C24;
   box-sizing: border-box;
-  padding:  16px ;
-  background-color: #211C24;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;     
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px 16px;
+  gap: 24px;
 }
+
 .bannerTop{
   width: 100%;
-  height: 344px;      
-  box-sizing: border-box;
-  margin-top:  88px;
-  align-items: center;
-  flex-direction: column;
   display: flex;
-  }
-  .bannerTopİmage{
-    width: 100%;
-    height: 289px;      
-    box-sizing: border-box;
-    align-items: center;
-    flex-direction: column;
-    display: flex;
-    margin-top: 28px;
-    }
+  flex-direction: column;
+  align-items: center;        
+  text-align: center;
+  gap: 16px;
+}
+
+.bannerTop h1,
+.bannerTop h2{
+  line-height: 1.05;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.bannerTopimage{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.bannerTopimage img{
+  width: auto;
+  max-width: 100%;
+  max-height: 360px;          
+  object-fit: contain;
+  display: block;
+}
+
   .bannerBottom{
     width: 100%;
     height: auto;      
@@ -225,7 +251,7 @@ body {
                     
                     
                     }
-                    .productItemİphone14Pro{
+                    .productItemiphone14Pro{
                       width: 100%;
                       height: 352px;      
                       box-sizing: border-box;
@@ -318,7 +344,7 @@ body {
                     gap: 16px;
                     }
                     
-                .DiscountİtemTopİphoneGold{
+                .DiscountitemTopiphoneGold{
                 width: 100%;
                 height: 352px;      
                 box-sizing: border-box;
@@ -1533,6 +1559,37 @@ border: 1px solid #d7d7db;
   margin-bottom: 48px;
 }
 
+.nav-cart {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.cart-badge {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+
+  background-color: #E53935;
+  color: white;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+
+  border-radius: 999px;
+
+  display: none; /* JS 0 değilse açacak */
+}
+
+
+
+
 
 #productsGrid{
   display: grid;
@@ -1572,70 +1629,45 @@ border: 1px solid #d7d7db;
   gap: 16px;
 }
 
+button{
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
 
+button:hover{
+  opacity: 0.9;
+}
+
+button:active{
+  transform: scale(0.98);
+}
 
 
 
 @media (min-width: 1024px) {
   
-  .banner {
-    display: flex;
-    align-items: center;          
+  .banner{
+    flex-direction: row;       
     justify-content: space-between;
-    padding: 0 120px;            
-    height: 769px;                
-    box-sizing: border-box;
+    align-items: center;
+    padding: 0 80px;
+    min-height: 769px;        
+    gap: 32px;
   }
 
-  .bannerTop {
-    width: 50%;
-    height: 100%;
-    margin-top: 0;                
-    display: flex;
-    flex-direction: column;
-    justify-content: center;      
-    align-items: flex-start;     
-  }
-
-  .bannerTopİmage {
-    width: 50%;
-    height: 100%;
-    display: flex;
-    justify-content: flex-end;   
-    align-items: flex-end; 
-    margin-top: 0;      
-  }
-
-  .bannerTopİmage img {
-    width: auto;                 
-    height: 732px;
-    margin-right: -120px;        
-  }
-
-  .bannerTop {
-    display: flex;
-    flex-direction: column;
+  .bannerTop{
+    width: 714px;              
     align-items: flex-start;
-    justify-content: center;
-    gap: 16px;
+    text-align: left;
   }
 
-  .bannerTop h1,
-  .bannerTop h2 {
-    display: inline-block;
-    margin: 0;
-    line-height: 1.1;
-    white-space: nowrap;
+  .bannerTopimage{
+    flex: 1;
+    justify-content: flex-end;
   }
-.bannerTop h2 {
-    margin-left: 16px;
-  }
-.bannerTop h1 {
-    font-size: 96px !important;
-  }
-.bannerTop h2 {
-    font-size: 96px !important;
-    font-weight: 700; 
+
+  .bannerTopimage img{
+    max-height: 520px;         
   }
 .navbar {
     padding: 0 80px;
@@ -1825,7 +1857,7 @@ border: 1px solid #d7d7db;
 
   
 
-  .DiscountİtemTopİphoneGold {
+  .DiscountitemTopiphoneGold {
     width: 320px;          
     min-height: 430px;    
     padding: 32px 24px;
@@ -1839,7 +1871,7 @@ border: 1px solid #d7d7db;
   }
 
   
-  .DiscountİtemTopİphoneGold button {
+  .DiscountitemTopiphoneGold button {
     margin-top: auto;
     margin-bottom: 16px;
   }
