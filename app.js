@@ -414,7 +414,12 @@ async function renderAll() {
 
       const data = await getJSON(`https://dummyjson.com/products/category/${encodeURIComponent(category)}?limit=12`);
       const products = data.products || [];
+       buildBrandFilters(products);
+       PRODUCTPAGE_ALL = products;
+PRODUCTPAGE_VIEW = products;
 
+buildBrandListDesktop(PRODUCTPAGE_ALL);
+setupBrandSearchDesktop();
       let html = "";
       for (let i = 0; i < products.length; i += 2) {
         const left = products[i];
@@ -452,6 +457,93 @@ async function renderAll() {
       console.error("❌ ProductPage fetch error:", err);
     }
   }
+}
+
+const filtersBtn = document.getElementById("filtersBtn");
+const ratingBtn = document.getElementById("ratingBtn");
+const filtersDrop = document.getElementById("filtersDrop");
+const ratingChevron = document.getElementById("ratingChevron");
+
+function toggleDrop() {
+  filtersDrop.classList.toggle("open");
+}
+
+filtersBtn?.addEventListener("click", toggleDrop);
+ratingBtn?.addEventListener("click", () => {
+  toggleDrop();
+  ratingChevron?.classList.toggle("rotate");
+});
+function buildBrandFilters(products) {
+  const box = document.getElementById("brandFilters");
+  if (!box) return;
+
+  const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
+
+  box.innerHTML = brands
+    .map(b => `<label><input type="checkbox" value="${b}"> ${b}</label>`)
+    .join("");
+}
+let PRODUCTPAGE_ALL = [];
+let PRODUCTPAGE_VIEW = [];
+
+function buildBrandListDesktop(products) {
+  const ul = document.getElementById("brandListDesktop");
+  if (!ul) return;
+
+  // brand -> count
+  const counts = new Map();
+  products.forEach(p => {
+    if (!p.brand) return;
+    counts.set(p.brand, (counts.get(p.brand) || 0) + 1);
+  });
+
+  const brands = [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+  ul.innerHTML = brands.map(([brand, count]) => `
+    <li>
+      <label class="brandItem">
+        <input type="checkbox" class="brandCheckDesktop" value="${brand}">
+        <span class="brandCheck"></span>
+        <span class="brandName">${brand}</span>
+        <span class="brandCount">${count}</span>
+      </label>
+    </li>
+  `).join("");
+
+  // checkbox değişince filtre uygula
+  ul.querySelectorAll(".brandCheckDesktop").forEach(chk => {
+    chk.addEventListener("change", applyDesktopBrandFilter);
+  });
+}
+
+function setupBrandSearchDesktop() {
+  const input = document.getElementById("brandSearchDesktop");
+  const ul = document.getElementById("brandListDesktop");
+  if (!input || !ul) return;
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    ul.querySelectorAll("li").forEach(li => {
+      const name = li.querySelector(".brandName")?.textContent?.toLowerCase() || "";
+      li.style.display = name.includes(q) ? "" : "none";
+    });
+  });
+}
+
+
+function applyDesktopBrandFilter() {
+  const selected = [...document.querySelectorAll(".brandCheckDesktop:checked")].map(x => x.value);
+
+  let filtered = [...PRODUCTPAGE_ALL];
+  if (selected.length) {
+    filtered = filtered.filter(p => selected.includes(p.brand));
+  }
+
+  PRODUCTPAGE_VIEW = filtered;
+
+  // mevcut ürün basma fonksiyonun varsa onu çağır
+  // yoksa şu anki ProductPage render kodunu tekrar çalıştırman gerekir
+  renderProductPageGridDesktop(PRODUCTPAGE_VIEW);
 }
 
 // ---------- global click handlers ----------

@@ -562,7 +562,40 @@ border-radius: 8px;
   flex-direction: row;
   
 }
-                
+   .filtersDrop{
+  width: 344px;
+  margin-left: 16px;
+  margin-right: 13px;
+  margin-top: 12px;
+
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 14px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.filtersDrop.open{
+  display: flex;
+}
+
+.filtersDropOptions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.filtersDropOptions label{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}             
 
   .ProductResult{
   width: 100%;
@@ -2597,6 +2630,10 @@ input[type="submit"]:active{
     display: grid;
     grid-template-columns: repeat(3, minmax(0,1fr));
     gap: 24px;
+  }
+   .filters-rating,
+  .filtersDrop {
+    display: none;
   }
 }
 

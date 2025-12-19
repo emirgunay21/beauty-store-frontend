@@ -25,7 +25,7 @@
 <div class="nav-icons">
   <img src="Favorites.png" style="width:24px;height:24px;" alt="Favorites">
 
-  <div class="nav-cart" style="margin-left:16px;">
+  <div class="nav-cart" id="navCart" style="margin-left:16px; cursor:pointer;">
     <img src="Cart.png" style="width:24px;height:24px;" alt="Cart">
     <span id="cartCount" class="cart-badge">0</span>
   </div>
@@ -35,10 +35,51 @@
   <img src="User.png" style="width:24px;height:24px;" alt="User">
 </div>
 </div>
-  <button class="nav-burger" type="button" style="margin-right:24px;">
-    <img src="Burger.png" style="width:40px;height:40px;" alt="menu">
-  </button>
+  <button class="nav-burger" id="burgerBtn" type="button"
+  aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu"
+  style="margin-right:24px;">
+  <img src="Burger.png" style="width:40px;height:40px;" alt="menu">
+</button>
 </div>
+<!-- Mobile Menu (hidden by default) -->
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <div class="mobile-menu-header">
+    <p style="margin:0;font-weight:600;">Menu</p>
+    <button class="mobile-menu-close" id="menuCloseBtn" aria-label="Close menu">✕</button>
+  </div>
+
+  <div class="mobile-menu-search">
+    <input type="text" placeholder="Search">
+  </div>
+
+  <nav class="mobile-menu-links">
+    <a href="Home.html">Home</a>
+    <a href="ProductPage.html" class="active">Product Page</a>
+    <a href="ProductDetailsMobile.html">Product Page Mobile</a>
+    <a href="Products Page Filters Mobile.html">Product Page Mobile Filters</a>
+    <a href="ShoppingCardMobile.html">Shopping Card</a>
+    <a href="step1.html">Adress İnformation</a>
+    <a href="Step2.html">Shipping Metod</a>
+    <a href="step3.html">Payment</a>
+  </nav>
+
+  <div class="mobile-menu-icons">
+    <button type="button" class="icon-btn" aria-label="Favorites">
+      <img src="Favorites.png" style="width:24px;height:24px;" alt="">
+    </button>
+
+    <button type="button" class="icon-btn" id="mobileCartBtn" aria-label="Cart">
+
+      <img src="Cart.png" style="width:24px;height:24px;" alt="">
+      <span id="cartCountMobile" class="cart-badge">0</span>
+    </button>
+
+    <button type="button" class="icon-btn" id="mobileUserBtn" aria-label="User">
+      <img src="User.png" style="width:24px;height:24px;" alt="">
+    </button>
+  </div>
+</div>
+<div class="menu-overlay" id="menuOverlay"></div>
 <div class="Breadcrumbs">
             <p style="color: #A4A4A4;">Home</p>
             <img src="Arrowright.png" alt="">
@@ -47,19 +88,34 @@
             <p>Smartphones</p>
         </div>
 <div class="filters-rating">
-    <div class="filters">
-      <h3>Filters</h3>  
+  <div class="filters" id="filtersBtn">
+    <h3>Filters</h3>  
     <img src="Filters.png" style="width:24px;height:24px;" alt="filter">
+  </div>
 
-        
-        </div>
-        <div class="rating">
-      <p>By rating</p>  
-    <img src="Chevron Down.png" style="width:24px;height:24px;" alt="filter">
+  <div class="rating" id="ratingBtn">
+    <p>By rating</p>  
+    <img id="ratingChevron" src="Chevron Down.png" style="width:24px;height:24px;" alt="chevron">
+  </div>
+</div>
 
-        
-        </div>
+<!-- TEK PANEL: aşağı açılacak -->
+<div class="filtersDrop" id="filtersDrop">
+  <div class="filtersDropRow">
+  <p style="margin:0;font-weight:600;">Brand</p>
+  <div class="filtersDropOptions" id="brandFilters"></div>
+</div>
+
+  <div class="filtersDropRow">
+    <p style="margin:0;font-weight:600;">Rating</p>
+    <div class="filtersDropOptions">
+      <label><input type="radio" name="rate"> 5 Stars</label>
+      <label><input type="radio" name="rate"> 4+ Stars</label>
+      <label><input type="radio" name="rate"> 3+ Stars</label>
+      <div class="filtersDropOptions" id="brandFilters"></div>
     </div>
+  </div>
+</div>
     
 <div class="ProductResultDesktop">
   <div class="productPageFiltersMobile">
@@ -81,10 +137,11 @@
   </div>
 <div class="productPageFiltersBrandsBottom">
 <div class="brandSearch">
-    <input type="text" placeholder="Search">
+    <input type="text" id="brandSearchDesktop" placeholder="Search">
   </div>
-<ul class="brandList">
-    <li>
+<ul class="brandList" id="brandListDesktop"></ul>
+    <!-- 
+<li>
       <label class="brandItem">
         <input type="checkbox" checked>
         <span class="brandCheck"></span>
@@ -166,8 +223,9 @@
         <span class="brandName">Real Me</span>
         <span class="brandCount">35</span>
       </label>
-    </li>
-</ul>
+    </li> 
+-->
+
 </div>
 
 </div>
