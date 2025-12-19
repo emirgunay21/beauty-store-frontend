@@ -19,24 +19,44 @@ function writeCart(cart) {
 }
 
 function updateCartBadge() {
-  const badge = document.getElementById("cartCount");
-  if (!badge) return;
+  const badgeDesktop = document.getElementById("cartCount");
+  const badgeMobile = document.getElementById("cartCountMobile");
 
   const cart = readCart();
   const totalQty = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
 
-  badge.textContent = totalQty;
-  badge.style.display = totalQty > 0 ? "inline-block" : "none";
+  // Desktop badge
+  if (badgeDesktop) {
+    badgeDesktop.textContent = totalQty;
+    badgeDesktop.style.display = totalQty > 0 ? "inline-block" : "none";
+  }
+
+  // Mobile badge
+  if (badgeMobile) {
+    badgeMobile.textContent = totalQty;
+    badgeMobile.style.display = totalQty > 0 ? "inline-block" : "none";
+  }
 }
+
 
 // ---------- login modal ----------
 function setupLoginModal() {
   const navUser = document.getElementById("navUser");
+  const mobileUserBtn = document.getElementById("mobileUserBtn");
+
+  const navCart = document.getElementById("navCart");
+  const mobileCartBtn = document.getElementById("mobileCartBtn");
+
   const modal = document.getElementById("loginModal");
   const emailEl = document.getElementById("loginEmail");
   const passEl = document.getElementById("loginPass");
   const btn = document.getElementById("loginBtn");
   const msg = document.getElementById("loginMsg");
+
+  const burgerBtn = document.getElementById("burgerBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const overlay = document.getElementById("menuOverlay");
+  const closeBtn = document.getElementById("menuCloseBtn");
 
   if (!navUser || !modal) return;
 
@@ -73,6 +93,7 @@ function setupLoginModal() {
     }
   }
 
+  // Desktop user click => modal / logout
   navUser.addEventListener("click", () => {
     const user = getUser();
     if (!user) openModal();
@@ -84,6 +105,57 @@ function setupLoginModal() {
     }
   });
 
+  // ✅ MOBİL USER: Login.html'ye gitme -> Desktop'taki aynı davranışı çalıştır
+  if (mobileUserBtn) {
+    mobileUserBtn.addEventListener("click", () => {
+      // Menüyü kapat (açıksa)
+      if (mobileMenu?.classList.contains("open")) closeMenu();
+      // Desktop user click'i tetikle => modal açılır / logout çalışır
+      navUser.click();
+    });
+  }
+
+  // Sepet yönlendirmeleri (desktop + mobile)
+  if (navCart) navCart.addEventListener("click", () => window.location.href = "ShoppingCardMobile.html");
+  if (mobileCartBtn) mobileCartBtn.addEventListener("click", () => window.location.href = "ShoppingCardMobile.html");
+
+  // ---------- burger menu ----------
+  function openMenu() {
+    if (!mobileMenu || !overlay || !burgerBtn) return;
+    mobileMenu.classList.add("open");
+    overlay.classList.add("show");
+    burgerBtn.setAttribute("aria-expanded", "true");
+    mobileMenu.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMenu() {
+    if (!mobileMenu || !overlay || !burgerBtn) return;
+    mobileMenu.classList.remove("open");
+    overlay.classList.remove("show");
+    burgerBtn.setAttribute("aria-expanded", "false");
+    mobileMenu.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  if (burgerBtn) {
+    burgerBtn.addEventListener("click", () => {
+      mobileMenu?.classList.contains("open") ? closeMenu() : openMenu();
+    });
+  }
+
+  overlay?.addEventListener("click", closeMenu);
+  closeBtn?.addEventListener("click", closeMenu);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  mobileMenu?.addEventListener("click", (e) => {
+    if (e.target.tagName === "A") closeMenu();
+  });
+
+  // ---------- modal close handlers ----------
   modal.addEventListener("click", (e) => {
     if (e.target?.dataset?.close) closeModal();
   });
@@ -109,6 +181,7 @@ function setupLoginModal() {
 
   renderUser();
 }
+
 
 // ---------- fetch render ----------
 async function renderAll() {
