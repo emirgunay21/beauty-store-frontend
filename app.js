@@ -31,15 +31,54 @@ function updateCartBadge() {
     badgeDesktop.style.display = totalQty > 0 ? "inline-block" : "none";
   }
 
-  // Mobile badge
+
   if (badgeMobile) {
     badgeMobile.textContent = totalQty;
     badgeMobile.style.display = totalQty > 0 ? "inline-block" : "none";
   }
 }
 
+function setupBurgerMenu() {
+  const burgerBtn = document.getElementById("burgerBtn");
+  const mobileMenu = document.getElementById("mobileMenu");
+  const overlay = document.getElementById("menuOverlay");
+  const closeBtn = document.getElementById("menuCloseBtn");
 
-// ---------- login modal ----------
+  
+  if (!burgerBtn || !mobileMenu || !overlay || !closeBtn) return;
+
+  function openMenu() {
+    mobileMenu.classList.add("open");
+    overlay.classList.add("open");
+    burgerBtn.setAttribute("aria-expanded", "true");
+    mobileMenu.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMenu() {
+    mobileMenu.classList.remove("open");
+    overlay.classList.remove("open");
+    burgerBtn.setAttribute("aria-expanded", "false");
+    mobileMenu.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+  }
+
+  burgerBtn.addEventListener("click", () => {
+    mobileMenu.classList.contains("open") ? closeMenu() : openMenu();
+  });
+
+  overlay.addEventListener("click", closeMenu);
+  closeBtn.addEventListener("click", closeMenu);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeMenu();
+  });
+
+  mobileMenu.addEventListener("click", (e) => {
+    if (e.target.tagName === "A") closeMenu();
+  });
+}
+
 function setupLoginModal() {
   const navUser = document.getElementById("navUser");
   const mobileUserBtn = document.getElementById("mobileUserBtn");
@@ -105,56 +144,31 @@ function setupLoginModal() {
     }
   });
 
-  // ✅ MOBİL USER: Login.html'ye gitme -> Desktop'taki aynı davranışı çalıştır
+  
   if (mobileUserBtn) {
-    mobileUserBtn.addEventListener("click", () => {
-      // Menüyü kapat (açıksa)
-      if (mobileMenu?.classList.contains("open")) closeMenu();
-      // Desktop user click'i tetikle => modal açılır / logout çalışır
-      navUser.click();
-    });
-  }
+  mobileUserBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  // Sepet yönlendirmeleri (desktop + mobile)
+    
+    if (mobileMenu && mobileMenu.classList.contains("open")) {
+      mobileMenu.classList.remove("open");
+      overlay?.classList.remove("show");  
+      burgerBtn?.setAttribute("aria-expanded", "false");
+      mobileMenu.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+    }
+
+    
+    navUser.click();
+  });
+}
+
+
   if (navCart) navCart.addEventListener("click", () => window.location.href = "ShoppingCardMobile.html");
   if (mobileCartBtn) mobileCartBtn.addEventListener("click", () => window.location.href = "ShoppingCardMobile.html");
 
-  // ---------- burger menu ----------
-  function openMenu() {
-    if (!mobileMenu || !overlay || !burgerBtn) return;
-    mobileMenu.classList.add("open");
-    overlay.classList.add("show");
-    burgerBtn.setAttribute("aria-expanded", "true");
-    mobileMenu.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeMenu() {
-    if (!mobileMenu || !overlay || !burgerBtn) return;
-    mobileMenu.classList.remove("open");
-    overlay.classList.remove("show");
-    burgerBtn.setAttribute("aria-expanded", "false");
-    mobileMenu.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
-  }
-
-  if (burgerBtn) {
-    burgerBtn.addEventListener("click", () => {
-      mobileMenu?.classList.contains("open") ? closeMenu() : openMenu();
-    });
-  }
-
-  overlay?.addEventListener("click", closeMenu);
-  closeBtn?.addEventListener("click", closeMenu);
-
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") closeMenu();
-  });
-
-  mobileMenu?.addEventListener("click", (e) => {
-    if (e.target.tagName === "A") closeMenu();
-  });
-
+ 
   // ---------- modal close handlers ----------
   modal.addEventListener("click", (e) => {
     if (e.target?.dataset?.close) closeModal();
@@ -208,7 +222,7 @@ async function renderAll() {
           <p style="font-size:24px;color:black;margin:0px;">
             $${p.price}
           </p>
-          <button data-product-id="${p.id}"
+          <button data-go-detail="1" data-product-id="${p.id}"
             style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
             Buy Now
           </button>
@@ -229,7 +243,7 @@ async function renderAll() {
         <p style="font-size:24px;color:black;margin:0px;">
           $${p.price}
         </p>
-        <button data-product-id="${p.id}"
+        <button data-go-detail="1" data-product-id="${p.id}" 
           style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
           Buy Now
         </button>
@@ -431,7 +445,7 @@ setupBrandSearchDesktop();
               <img src="${left.thumbnail}" style="width:104px;height:104px;" alt="${left.title}">
               <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${left.title}</h2>
               <p style="font-size:24px;color:black;margin:0;">$${left.price}</p>
-              <button data-product-id="${left.id}"
+              <button data-go-detail="1" data-product-id="${left.id}"
                 style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
                 Buy Now
               </button>
@@ -442,7 +456,7 @@ setupBrandSearchDesktop();
               <img src="${right.thumbnail}" style="width:104px;height:104px;" alt="${right.title}">
               <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${right.title}</h2>
               <p style="font-size:24px;color:black;margin:0;">$${right.price}</p>
-              <button data-product-id="${right.id}"
+              <button data-go-detail="1" data-product-id="${right.id}"
                 style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
                 Buy Now
               </button>
@@ -510,7 +524,7 @@ function buildBrandListDesktop(products) {
     </li>
   `).join("");
 
-  // checkbox değişince filtre uygula
+  
   ul.querySelectorAll(".brandCheckDesktop").forEach(chk => {
     chk.addEventListener("change", applyDesktopBrandFilter);
   });
@@ -541,38 +555,219 @@ function applyDesktopBrandFilter() {
 
   PRODUCTPAGE_VIEW = filtered;
 
-  // mevcut ürün basma fonksiyonun varsa onu çağır
-  // yoksa şu anki ProductPage render kodunu tekrar çalıştırman gerekir
+
   renderProductPageGridDesktop(PRODUCTPAGE_VIEW);
 }
 
 // ---------- global click handlers ----------
 function setupClicks() {
-  // add-to-cart (Buy Now)
   document.body.addEventListener("click", (e) => {
-    const button = e.target.closest("button[data-product-id]");
-    if (!button) return;
 
-    const productId = Number(button.dataset.productId);
-    if (!Number.isFinite(productId)) return;
+    // 1) Detaya gitme (Buy Now)
+    const goDetailBtn = e.target.closest("button[data-go-detail='1']");
+    if (goDetailBtn) {
+      const id = Number(goDetailBtn.dataset.productId);
+      if (!Number.isFinite(id)) return;
+      window.location.href = `ProductDetailsMobile.html?id=${id}`;
+      return;
+    }
 
-    const cart = readCart();
-    const existing = cart.find(i => Number(i.id) === productId);
+    // 2) Sepete ekleme (Add to Cart)
+    const addCartBtn = e.target.closest("button[data-add-cart='1']");
+    if (addCartBtn) {
+      const id = Number(addCartBtn.dataset.productId);
+      if (!Number.isFinite(id)) return;
 
-    if (existing) existing.qty = (existing.qty || 0) + 1;
-    else cart.push({ id: productId, qty: 1 });
+      const cart = readCart();
+      const existing = cart.find(i => Number(i.id) === id);
 
-    writeCart(cart);
-    updateCartBadge();
+      if (existing) existing.qty = (existing.qty || 0) + 1;
+      else cart.push({ id, qty: 1 });
+
+      writeCart(cart);
+      updateCartBadge();
+      return;
+    }
+
   });
+}
+
+async function renderProductDetails() {
+  const root = document.getElementById("productDetailsRoot");
+  if (!root) return;
+
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+  if (!id) {
+    root.innerHTML = "<p style='padding:16px;'>Ürün bulunamadı (id yok).</p>";
+    return;
+  }
+
+  try {
+    const p = await getJSON(`https://dummyjson.com/products/${encodeURIComponent(id)}`);
+    const thumbs = (p.images || []).slice(0, 4);
+
+    // Beauty ise varyantları göster
+    const cat = String(p.category || "").toLowerCase();
+    const isBeauty = ["beauty", "fragrances", "skin-care"].includes(cat);
+
+    const shadeOptions = [
+      { key: "01", name: "Light" },
+      { key: "02", name: "Medium" },
+      { key: "03", name: "Dark" },
+    ];
+
+    const sizeOptions = ["30ml", "50ml", "100ml"];
+
+    root.innerHTML = `
+      <div class="productPageDetailsMobileMedia">
+        <div class="productPageFiltersMobileTop">
+          <img src="${p.thumbnail}" style="width:263.59px;height:329.24px;" alt="${p.title}">
+          <div class="imageFilters">
+            ${thumbs.map(src => `<img src="${src}" style="width:74px;height:66px;" alt="thumb">`).join("")}
+          </div>
+        </div>
+
+        <div class="productPageDetailsMobileContent">
+          <div class="productPageDetailsMobileText">
+            <h1 style="font-size:40px;font-weight:bold;margin:0;">${p.title}</h1>
+            <div class="productPageDetailsMobileText2">
+              <p style="font-size:32px;margin:0;">$${p.price}</p>
+              ${p.discountPercentage ? `
+                <p style="font-size:24px;color:gray;text-decoration:line-through;margin-left:16px;margin-top:6px;">
+                  $${Math.round(p.price / (1 - (p.discountPercentage/100)))}
+                </p>` : ``}
+            </div>
+          </div>
+
+          <div class="metaGrid">
+            <div class="metaItem">
+              <p class="metaLabel">Brand</p>
+              <p class="metaValue">${p.brand || "-"}</p>
+            </div>
+            <div class="metaItem">
+              <p class="metaLabel">Category</p>
+              <p class="metaValue">${p.category || "-"}</p>
+            </div>
+            <div class="metaItem">
+              <p class="metaLabel">Rating</p>
+              <p class="metaValue">${p.rating ?? "-"}</p>
+            </div>
+            <div class="metaItem">
+              <p class="metaLabel">Stock</p>
+              <p class="metaValue">${Number(p.stock||0) > 0 ? `${p.stock} pcs` : "Out of stock"}</p>
+            </div>
+          </div>
+
+          ${isBeauty ? `
+          <div class="variantBlock">
+            <p class="metaLabel" style="margin-bottom:10px;">Shade</p>
+            <div class="pillRow" id="shadeRow">
+              ${shadeOptions.map(s => `
+                <button type="button" class="pillBtn" data-shade="${s.key}">
+                  ${s.key} <span style="opacity:.7;margin-left:6px;">${s.name}</span>
+                </button>
+              `).join("")}
+            </div>
+          </div>
+
+          <div class="variantBlock">
+            <p class="metaLabel" style="margin-bottom:10px;">Size</p>
+            <div class="pillRow" id="sizeRow">
+              ${sizeOptions.map(sz => `
+                <button type="button" class="pillBtn" data-size="${sz}">${sz}</button>
+              `).join("")}
+            </div>
+          </div>
+          ` : ""}
+
+          <p style="font-size:15px;color:#6C6C6C;margin-top:18px;">${p.description || ""}</p>
+
+          <div class="productPageDetailsMobileButtons">
+            <button style="width:341px;height:56px;background:white;border-radius:8px;border:1px solid black;color:black;font-size:16px;margin-top:26px;">
+              Add to Wishlist
+            </button>
+
+            <button id="addToCartBtn"
+              style="width:341px;height:56px;background:black;border-radius:8px;border:1px solid black;color:white;font-size:16px;margin-top:16px;">
+              Add to Cart
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // ✅ seçimi yönet
+    let selectedShade = null;
+    let selectedSize = null;
+
+    function bindPills(rowId, attr, onSelect) {
+      const row = document.getElementById(rowId);
+      if (!row) return;
+      row.querySelectorAll(".pillBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          row.querySelectorAll(".pillBtn").forEach(x => x.classList.remove("active"));
+          btn.classList.add("active");
+          onSelect(btn.dataset[attr]);
+        });
+      });
+    }
+
+    if (isBeauty) {
+      bindPills("shadeRow", "shade", (v) => selectedShade = v);
+      bindPills("sizeRow", "size", (v) => selectedSize = v);
+
+      // varsayılan seçili olsun istersen:
+      const firstShade = document.querySelector("#shadeRow .pillBtn");
+      if (firstShade) firstShade.click();
+      const firstSize = document.querySelector("#sizeRow .pillBtn");
+      if (firstSize) firstSize.click();
+    }
+
+    // ✅ Add to cart: seçilen varyantları da yaz
+    const addBtn = document.getElementById("addToCartBtn");
+    addBtn?.addEventListener("click", () => {
+      // stock 0 ise ekletme (istersen)
+      if (Number(p.stock || 0) <= 0) {
+        alert("Stok yok.");
+        return;
+      }
+
+      const cart = readCart();
+
+      // Aynı ürün ama farklı varyant => ayrı satır olsun
+      const key = `${p.id}|${selectedShade || ""}|${selectedSize || ""}`;
+      const existing = cart.find(i => i.key === key);
+
+      if (existing) existing.qty = (existing.qty || 0) + 1;
+      else cart.push({
+        key,
+        id: p.id,
+        qty: 1,
+        shade: selectedShade,
+        size: selectedSize
+      });
+
+      writeCart(cart);
+      updateCartBadge();
+    });
+
+  } catch (err) {
+    console.error(err);
+    root.innerHTML = "<p style='padding:16px;'>Ürün yüklenemedi.</p>";
+  }
 }
 
 // ---------- init ----------
 document.addEventListener("DOMContentLoaded", async () => {
-  setupLoginModal();
+  setupBurgerMenu();   
+  setupLoginModal();  
   setupClicks();
+
   try {
     await renderAll();
+     await renderProductDetails();
+    
   } catch (e) {
     console.error(e);
   }

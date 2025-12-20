@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="still.css">   
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+ 
+  <link rel="stylesheet" href="still.css">      
 </head>
 <body>
-    <div class="container">
+  <div class="container">
     <div class="navbar">
   <div class="nav-logo">
     <img src="Logo.png" style="width:65px;height:22px;" alt="logo">
@@ -16,54 +17,109 @@
     <input type="text" placeholder="Search">
   </div>
 <div class="nav-links">
-    <a href="#">Home</a>
+    <a href="Home.html" class="active">Home</a>
     <a href="#">About</a>
     <a href="#">Contact Us</a>
     <a href="#">Blog</a>
   </div>
 <div class="nav-icons">
-    <img src="Favorites.png" style="width:24px;height:24px;" alt="Favorites">
-    <img src="Cart.png" style="width:24px;height:24px;margin-left:16px;" alt="Cart">
-    <img src="User.png" style="width:24px;height:24px;margin-left:16px;" alt="User">
+  <img src="Favorites.png" style="width:24px;height:24px;" alt="Favorites">
+
+  <div class="nav-cart" id="navCart" style="margin-left:16px; cursor:pointer;">
+    <img src="Cart.png" style="width:24px;height:24px;" alt="Cart">
+    <span id="cartCount" class="cart-badge">0</span>
   </div>
-  <button class="nav-burger" type="button" style="margin-right:24px;">
-    <img src="Burger.png" style="width:40px;height:40px;" alt="menu">
-  </button>
+
+  
+  <div class="nav-user" id="navUser" style="margin-left:16px;cursor:pointer;">
+  <img src="User.png" style="width:24px;height:24px;" alt="User">
 </div>
+</div>
+  <button class="nav-burger" id="burgerBtn" type="button"
+  aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu"
+  style="margin-right:24px;">
+  <img src="Burger.png" style="width:40px;height:40px;" alt="menu">
+</button>
+</div>
+
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <div class="mobile-menu-header">
+    <p style="margin:0;font-weight:600;">Menu</p>
+    <button class="mobile-menu-close" id="menuCloseBtn" aria-label="Close menu">✕</button>
+  </div>
+
+  <div class="mobile-menu-search">
+    <input type="text" placeholder="Search">
+  </div>
+
+  <nav class="mobile-menu-links">
+    <a href="Home.html">Home</a>
+    <a href="ProductPage.html" class="active">Product Page</a>
+    <a href="ProductDetailsMobile.html">Product Page Mobile</a>
+    <a href="Products Page Filters Mobile.html">Product Page Mobile Filters</a>
+    <a href="ShoppingCardMobile.html">Shopping Card</a>
+    <a href="step1.html">Adress İnformation</a>
+    <a href="Step2.html">Shipping Metod</a>
+    <a href="step3.html">Payment</a>
+  </nav>
+
+  <div class="mobile-menu-icons">
+    <button type="button" class="icon-btn" aria-label="Favorites">
+      <img src="Favorites.png" style="width:24px;height:24px;" alt="">
+    </button>
+
+    <button type="button" class="icon-btn" id="mobileCartBtn" aria-label="Cart">
+
+      <img src="Cart.png" style="width:24px;height:24px;" alt="">
+      <span id="cartCountMobile" class="cart-badge">0</span>
+    </button>
+
+    <button type="button" class="icon-btn" id="mobileUserBtn" aria-label="User">
+      <img src="User.png" style="width:24px;height:24px;" alt="">
+    </button>
+  </div>
+</div>
+<div class="menu-overlay" id="menuOverlay"></div>
 <div class="Breadcrumbs">
             <p style="color: #A4A4A4;">Home</p>
             <img src="Arrowright.png" alt="">
             <p style="color: #A4A4A4;">Catalog</p>
             <img src="Arrowright.png" alt="">
-            <p style="color: #A4A4A4;">Smartphone</p>
+            <p style="color: #A4A4A4;">Beauty</p>
             <img src="Arrowright.png" alt="">
             <p style="color: #A4A4A4;">Apple</p>
             <img src="Arrowright.png" alt="">
-            <p>iPhone 14 Pro Max</p>
+            <p>Mascara</p>
             
 
         </div>
+        <!--
     <div class="productPageDetailsMobileMedia">
         <div class="productPageFiltersMobileTop">
-<img src="iphone13.png" style="width: 263.59px;height: 329.24px;" alt="filter">
+<img id="pdMainImg" src="iphone13.png" style="width: 263.59px;height: 329.24px;" alt="product">
         <div class="filtersMobile">
             
         </div>
-        <div class="imageFilters">
+        <div class="imageFilters" id="pdThumbs">
+        
             <img src="iphone14pro.png" style="width: 74px;height: 66px;" alt="menu">
             <img src="image 61.png" style="width: 74px;height:66px;" alt="menu">
             <img src="image 62.png" style="width: 74px;height:66px;" alt="menu">
             <img src="image 63.png" style="width: 74px;height:66px;" alt="menu">
-        </div>
+      
+          </div>
         </div>
 <div class="productPageDetailsMobileContent">
 
 
         <div class="productPageDetailsMobileText">
-    <h1 style="font-size: 40px;font-weight: bold;font-family:Arial, Helvetica, sans-serif;margin: 0px;">Apple iPhone 14 Pro Max</h1>
+   <h1 id="pdTitle" style="font-size: 40px;font-weight: bold;font-family:Arial, Helvetica, sans-serif;margin: 0px;">
+  Apple iPhone 14 Pro Max
+</h1>
     <div class="productPageDetailsMobileText2">
-    <p style="font-size: 32px;">$1399</p>
-    <p1 style="font-size: 24px;color: gray;text-decoration: line-through;margin-left: 16px;">$1499</p1>
+<p id="pdPrice" style="font-size: 32px;">$1399</p>
+<p id="pdOldPrice" style="font-size: 24px;color: gray;text-decoration: line-through;margin-left: 16px;">$1499</p>
+
     </div>
 </div>
       
@@ -140,7 +196,7 @@
 
 </div>
     </div>
-    <p style="font-size: 15px;color: #6C6C6C; margin-top: 24px;">Enhanced capabilities thanks toan enlarged display of 6.7 inchesand work without rechargingthroughout the day. Incredible photosas in weak, yesand in bright lightusing the new systemwith two cameras more...</p>
+    <p id="pdDesc" style="font-size: 15px;color: #6C6C6C; margin-top: 24px;">Enhanced capabilities thanks toan enlarged display of 6.7 inchesand work without rechargingthroughout the day. Incredible photosas in weak, yesand in bright lightusing the new systemwith two cameras more...</p>
     </div>
     
     </div>
@@ -168,6 +224,9 @@
   </div>
   </div>
   </div>
+  -->
+          <div id="productDetailsRoot"></div>
+<!--  -->
   <div class="productPageDetailsMobileDetailContentMedia">
   <h1 style="font-size: 24px;font-weight: bold;margin-top: 128px;">Details</h1>
     <div class="productPageDetailsMobileDetailContentText">
@@ -255,7 +314,7 @@
     </div>
     
 
- 
+ <div id="reviewsRoot"></div>
 
 </div>
 <div class="productPageFiltersMobileRewiewsSchedule">
@@ -444,5 +503,28 @@
                 </div>
     </div>
 </div>
+<div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-backdrop" data-close="1"></div>
+
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal-head">
+      <h3 id="loginTitle" style="margin:0;">Sign in</h3>
+      <button class="modal-x" type="button" data-close="1" aria-label="Close">×</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="modal-label">Email</label>
+      <input id="loginEmail" class="modal-input" type="email" placeholder="you@example.com">
+
+      <label class="modal-label">Password</label>
+      <input id="loginPass" class="modal-input" type="password" placeholder="••••••••">
+
+      <button id="loginBtn" class="modal-btn" type="button">Login</button>
+      <p id="loginMsg" style="margin:12px 0 0 0;font-size:12px;opacity:.8;"></p>
+    </div>
+  </div>
+</div>
+  <script src="data.js" defer></script>
+<script src="app.js" defer></script>
     </body>
 </html>
