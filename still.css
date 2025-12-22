@@ -1211,17 +1211,23 @@ border-radius: 8px;
                 border-radius: 8px;
   }
 .shoppingCardMobile{
-    width: 341px ;
-    height: 656px ;
-    margin-top: 40px;
-    flex-direction: column;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px;
-    border-radius: 8px;
+  
+  width: 341px;
+  /* height: 656px;  <-- bunu KALDIR */
+  min-height: 656px;          /* istersen kutu en az bu kadar olsun */
+  margin-top: 40px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* <-- space-between yerine */
+
+  gap: 16px;                  /* arayı gap ile ver */
+  padding: 16px;
+  border-radius: 8px;
+}
     
-  }
+  
   .shopingCardProduct{
     width: 341px ;
     height: 152px ;
@@ -1909,6 +1915,25 @@ input[type="submit"]:active{
 
 #productPageGrid > *{
   min-width: 0; /* taşmayı keser */
+}
+.cartProductsScroll{
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  /* ✅ 1 ürün varken uzamasın */
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
+}
+
+/* ✅ ürün çoksa scroll aç */
+.cartProductsScroll.is-scroll{
+  max-height: 420px;   /* mobil */
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 @media (min-width: 1024px) {
@@ -2686,6 +2711,9 @@ input[type="submit"]:active{
    .filters-rating,
   .filtersDrop {
     display: none;
+  }
+  .cartProductsScroll.is-scroll{
+    max-height: 520px; /* desktop */
   }
 }
 

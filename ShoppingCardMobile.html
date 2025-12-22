@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="still.css">   
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document</title>
+ 
+  <link rel="stylesheet" href="still.css">      
 </head>
 <body>
-    <div class="container">
+  <div class="container">
     <div class="navbar">
   <div class="nav-logo">
     <img src="Logo.png" style="width:65px;height:22px;" alt="logo">
@@ -16,137 +17,126 @@
     <input type="text" placeholder="Search">
   </div>
 <div class="nav-links">
-    <a href="#">Home</a>
+    <a href="Home.html" class="active">Home</a>
     <a href="#">About</a>
     <a href="#">Contact Us</a>
     <a href="#">Blog</a>
   </div>
 <div class="nav-icons">
-    <img src="Favorites.png" style="width:24px;height:24px;" alt="Favorites">
-    <img src="Cart.png" style="width:24px;height:24px;margin-left:16px;" alt="Cart">
-    <img src="User.png" style="width:24px;height:24px;margin-left:16px;" alt="User">
-  </div>
-  <button class="nav-burger" type="button" style="margin-right:24px;">
-    <img src="Burger.png" style="width:40px;height:40px;" alt="menu">
-  </button>
-</div>
-<div class="Breadcrumbs">
-            <p style="color: #A4A4A4;">Home</p>
-            <img src="Arrowright.png" alt="">
-            <p style="color: #A4A4A4;">Catalog</p>
-            <img src="Arrowright.png" alt="">
-            <p style="color: #A4A4A4;">Smartphone</p>
-            <img src="Arrowright.png" alt="">
-            <p style="color: #A4A4A4;">Apple</p>
-            <img src="Arrowright.png" alt="">
-            <p>iPhone 14 Pro Max</p>
-            
+  <img src="Favorites.png" style="width:24px;height:24px;" alt="Favorites">
 
-        </div>
+  <div class="nav-cart" id="navCart" style="margin-left:16px; cursor:pointer;">
+    <img src="Cart.png" style="width:24px;height:24px;" alt="Cart">
+    <span id="cartCount" class="cart-badge">0</span>
+  </div>
+
+  
+  <div class="nav-user" id="navUser" style="margin-left:16px;cursor:pointer;">
+  <img src="User.png" style="width:24px;height:24px;" alt="User">
+</div>
+</div>
+  <button class="nav-burger" id="burgerBtn" type="button"
+  aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu"
+  style="margin-right:24px;">
+  <img src="Burger.png" style="width:40px;height:40px;" alt="menu">
+</button>
+</div>
+
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <div class="mobile-menu-header">
+    <p style="margin:0;font-weight:600;">Menu</p>
+    <button class="mobile-menu-close" id="menuCloseBtn" aria-label="Close menu">✕</button>
+  </div>
+
+  <div class="mobile-menu-search">
+    <input type="text" placeholder="Search">
+  </div>
+
+  <nav class="mobile-menu-links">
+    <a href="Home.html">Home</a>
+    <a href="ProductPage.html" class="active">Product Page</a>
+    <a href="ProductDetailsMobile.html">Product Page Mobile</a>
+    <a href="Products Page Filters Mobile.html">Product Page Mobile Filters</a>
+    <a href="ShoppingCardMobile.html">Shopping Card</a>
+    <a href="step1.html">Adress İnformation</a>
+    <a href="Step2.html">Shipping Metod</a>
+    <a href="step3.html">Payment</a>
+  </nav>
+
+  <div class="mobile-menu-icons">
+    <button type="button" class="icon-btn" aria-label="Favorites">
+      <img src="Favorites.png" style="width:24px;height:24px;" alt="">
+    </button>
+
+    <button type="button" class="icon-btn" id="mobileCartBtn" aria-label="Cart">
+
+      <img src="Cart.png" style="width:24px;height:24px;" alt="">
+      <span id="cartCountMobile" class="cart-badge">0</span>
+    </button>
+
+    <button type="button" class="icon-btn" id="mobileUserBtn" aria-label="User">
+      <img src="User.png" style="width:24px;height:24px;" alt="">
+    </button>
+  </div>
+</div>
+<div class="menu-overlay" id="menuOverlay"></div>
+
+        
+          
         <div class="shoppingCardMobileMedia">
-        <div class ="shoppingCardMobile">
-            <h1 style="font-size: 24px;">Shopping Cart</h1>
-            <div class="shopingCardProduct">
-                <img src="iphone14pro.png" alt="Iphone14ProMax" style="width: 90px;height:90px;">
-                <div class="shopingCardProductDetails">
-                    <div class="shopingCardProductDetailsTitle">
-                    <p style="font-size: 16px;font-weight: 500;margin: 0;">Apple iPhone 14 Pro Max 128Gb Deep Purple</p>
-                    <p style="font-size: 14px;">#25139526913984</p>
-                    
-                    </div>
-                    <div class="shopingCardProductDetailsQuantity">
-                        <button class="quantityButton">-</button>
-                            <p class="quantityNumber">1</p>
-                            <button class="quantityButton">+</button>
-                        <p style="font-size: 20px;margin: 0;">$1399</p>
-                        <button class="cancel-btn" aria-label="Remove product"> &times;</button>
+  <div class="shoppingCardMobile">
+    <h1 style="font-size: 24px;">Shopping Cart</h1>
 
-                </div>
-            
-        </div>
-        </div>
-        <div class="shopingCardProduct">
-                <img src="airpods.png" alt="Iphone14ProMax" style="width: 90px;height:90px;">
-                <div class="shopingCardProductDetails">
-                    <div class="shopingCardProductDetailsTitle">
-                    <p style="font-size: 16px;font-weight: 500;margin: 0;">AirPods Max Silver</p>
-                    <p style="font-size: 14px;">#53459358345</p>
-                    
-                    </div>
-                    <div class="shopingCardProductDetailsQuantity">
-                        <button class="quantityButton">-</button>
-                            <p class="quantityNumber">1</p>
-                            <button class="quantityButton">+</button>
-                        <p style="font-size: 20px;margin: 0;">$549</p>
-                        <button class="cancel-btn" aria-label="Remove product"> &times;</button>
-
-                </div>
-            
-        </div>
-        </div>
-        <div class="shopingCardProduct">
-                <img src="applewatch.png" alt="Iphone14ProMax" style="width: 90px;height:90px;">
-                <div class="shopingCardProductDetails">
-                    <div class="shopingCardProductDetailsTitle">
-                    <p style="font-size: 16px;font-weight: 500;margin: 0;">Apple Watch Series 9 GPS 41mm Starlight Aluminium</p>
-                    <p style="font-size: 14px;">#63632324</p>
-                    
-                    </div>
-                    <div class="shopingCardProductDetailsQuantity">
-                        <button class="quantityButton">-</button>
-                            <p class="quantityNumber">1</p>
-                            <button class="quantityButton">+</button>
-                        <p style="font-size: 20px;margin: 0;">$399</p>
-                        <button class="cancel-btn" aria-label="Remove product"> &times;</button>
-
-                </div>
-            
-        </div>
-        </div>
-        </div>
-        <div class="orderSumarry">
-  <h2 style="font-size: 20px;">Order Summary</h2>
-
-  <div class="orderSumarryDetails">
-    <div class="orderSumarryFields">
-      <div class="promoField">
-        <label>Discount code / Promo code</label>
-        <div class="labelField">
-          <input class="fieldInput" type="text" placeholder="Code">
-        </div>
-      </div>
-      <div class="promoField">
-        <label>Your bonus card number</label>
-        <div class="labelField">
-          <input class="fieldInput" type="text" placeholder="Enter Card Number">
-          <button class="applyBtn">Apply</button>
-        </div>
-      </div>
-
-    </div>
-    <div class="orderSumarryTotal">
-    <div class="totalRow">
-      <p>Subtotal</p>
-      <p>$2347</p>
-    </div>
-    <div class="totalRow">
-      <p>Estimated Tax</p>
-      <p>$50</p>
-    </div>
-    <div class="totalRow">
-      <p>Estimated shipping & Handling</p>
-      <p>$29</p>
-    </div>
-    <div class="totalRow totalAmount">
-      <p>Total</p>
-      <p>$2426</p>
-    </div>
     
+    
+    <div id="cartList" class="cartProductsScroll"></div>
+  </div>
+
+  <div class="orderSumarry">
+    <h2 style="font-size: 20px;">Order Summary</h2>
+
+    <div class="orderSumarryDetails">
+      <div class="orderSumarryFields">
+        <div class="promoField">
+          <label>Discount code / Promo code</label>
+          <div class="labelField">
+            <input class="fieldInput" id="promoCode" type="text" placeholder="Code">
+          </div>
+        </div>
+
+        <div class="promoField">
+          <label>Your bonus card number</label>
+          <div class="labelField">
+            <input class="fieldInput" id="bonusCard" type="text" placeholder="Enter Card Number">
+            <button class="applyBtn" id="applyBonusBtn" type="button">Apply</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="orderSumarryTotal">
+        <div class="totalRow">
+          <p>Subtotal</p>
+          <p id="sumSubtotal">$0</p>
+        </div>
+        <div class="totalRow">
+          <p>Estimated Tax</p>
+          <p id="sumTax">$0</p>
+        </div>
+        <div class="totalRow">
+          <p>Estimated shipping &amp; Handling</p>
+          <p id="sumShip">$0</p>
+        </div>
+        <div class="totalRow totalAmount">
+          <p>Total</p>
+          <p id="sumTotal">$0</p>
+        </div>
+      </div>
+
+      <button class="checkoutBtn" id="checkoutBtn" type="button">Checkout</button>
+    </div>
+  </div>
 </div>
-<button class="checkoutBtn">Checkout</button>
-  </div>
-  </div>
-  </div>
+
  <div class="footer">
     <div class="footerContent">
     <div class="footerTop">
@@ -185,6 +175,29 @@
 </div>
 
 </div>
+<div class="modal" id="loginModal" aria-hidden="true">
+  <div class="modal-backdrop" data-close="1"></div>
+
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+    <div class="modal-head">
+      <h3 id="loginTitle" style="margin:0;">Sign in</h3>
+      <button class="modal-x" type="button" data-close="1" aria-label="Close">×</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="modal-label">Email</label>
+      <input id="loginEmail" class="modal-input" type="email" placeholder="you@example.com">
+
+      <label class="modal-label">Password</label>
+      <input id="loginPass" class="modal-input" type="password" placeholder="••••••••">
+
+      <button id="loginBtn" class="modal-btn" type="button">Login</button>
+      <p id="loginMsg" style="margin:12px 0 0 0;font-size:12px;opacity:.8;"></p>
+    </div>
+  </div>
+</div>
+  <script src="data.js" defer></script>
+<script src="app.js" defer></script>
     </body>
 </html>
         

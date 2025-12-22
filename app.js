@@ -952,6 +952,130 @@ async function renderProductDetails() {
     root.innerHTML = "<p style='padding:16px;'>Ürün yüklenemedi.</p>";
   }
 }
+// ---------- Shopping Cart render ----------
+async function renderCartPage() {
+  const listEl = document.getElementById("cartList");
+  if (!listEl) return; 
+
+  const cart = readCart(); 
+  if (!cart.length) {
+    listEl.innerHTML = `<p style="padding:12px;color:#6C6C6C;">Sepet boş</p>`;
+      listEl.classList.remove("is-scroll"); 
+    updateSummary(0);
+    return;
+  }
+
+  
+  const ids = [...new Set(cart.map(i => Number(i.id)).filter(Boolean))];
+  const products = await Promise.all(
+    ids.map(id => getJSON(`https://dummyjson.com/products/${id}`).catch(() => null))
+  );
+  const byId = new Map(products.filter(Boolean).map(p => [Number(p.id), p]));
+
+  // satırları oluştur
+  let subtotal = 0;
+
+  listEl.innerHTML = cart.map(item => {
+    const p = byId.get(Number(item.id));
+    const title = p?.title || "Product";
+    const thumb = p?.thumbnail || "placeholder.png";
+    const price = Number(p?.price || 0);
+    const qty = Number(item.qty || 0);
+
+    const lineTotal = price * qty;
+    subtotal += lineTotal;
+
+    // varyant etiketi (beauty için)
+    const variantText = [
+      item.shade ? `Shade: ${item.shade}` : "",
+      item.size ? `Size: ${item.size}` : ""
+    ].filter(Boolean).join(" • ");
+
+    const rowKey = item.key || String(item.id);
+
+    return `
+      <div class="shopingCardProduct" data-row-key="${rowKey}">
+        <img src="${thumb}" alt="${title}" style="width: 90px;height:90px;object-fit:cover;">
+        <div class="shopingCardProductDetails">
+          <div class="shopingCardProductDetailsTitle">
+            <p style="font-size: 16px;font-weight: 500;margin: 0;">${title}</p>
+            ${variantText ? `<p style="font-size: 12px;color:#6C6C6C;margin:4px 0 0 0;">${variantText}</p>` : ""}
+          </div>
+
+          <div class="shopingCardProductDetailsQuantity">
+            <button class="quantityButton" type="button" data-dec="1">-</button>
+            <p class="quantityNumber">${qty}</p>
+            <button class="quantityButton" type="button" data-inc="1">+</button>
+
+            <p style="font-size: 20px;margin: 0;">$${lineTotal.toFixed(0)}</p>
+            <button class="cancel-btn" type="button" aria-label="Remove product" data-remove="1">&times;</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  updateSummary(subtotal);
+const itemsCount = listEl.children.length;
+listEl.classList.toggle("is-scroll", itemsCount >= 3);
+  // tek event: + / - / sil
+  listEl.addEventListener("click", (e) => {
+    const row = e.target.closest(".shopingCardProduct");
+    if (!row) return;
+
+    const key = row.dataset.rowKey;
+    if (!key) return;
+
+    let cartNow = readCart();
+
+    const idx = cartNow.findIndex(x => (x.key || String(x.id)) === key);
+    if (idx === -1) return;
+
+    if (e.target.closest("[data-inc='1']")) {
+      cartNow[idx].qty = (Number(cartNow[idx].qty) || 0) + 1;
+    }
+
+    if (e.target.closest("[data-dec='1']")) {
+      cartNow[idx].qty = (Number(cartNow[idx].qty) || 0) - 1;
+      if (cartNow[idx].qty <= 0) cartNow.splice(idx, 1);
+    }
+
+    if (e.target.closest("[data-remove='1']")) {
+      cartNow.splice(idx, 1);
+    }
+
+    writeCart(cartNow);
+    updateCartBadge();
+    renderCartPage(); // yeniden bas
+  }, { once: true }); // ⚠️ renderCartPage yeniden çağırdığı için burada once kullandım
+}
+
+function updateSummary(subtotal) {
+  // basit hesap: tax %2, shipping sabit 29 (subtotal 0 ise 0)
+  const tax = subtotal > 0 ? subtotal * 0.02 : 0;
+  const ship = subtotal > 0 ? 29 : 0;
+  const total = subtotal + tax + ship;
+
+  const s1 = document.getElementById("sumSubtotal");
+  const s2 = document.getElementById("sumTax");
+  const s3 = document.getElementById("sumShip");
+  const s4 = document.getElementById("sumTotal");
+
+  if (s1) s1.textContent = `$${subtotal.toFixed(0)}`;
+  if (s2) s2.textContent = `$${tax.toFixed(0)}`;
+  if (s3) s3.textContent = `$${ship.toFixed(0)}`;
+  if (s4) s4.textContent = `$${total.toFixed(0)}`;
+}
+
+function setupCheckoutBtn() {
+  const btn = document.getElementById("checkoutBtn");
+  if (!btn) return;
+
+  btn.addEventListener("click", () => {
+    window.location.href = "step1.html";
+  });
+}
+
 async function renderRelatedProducts(p) {
   const grid = document.getElementById("relatedProductsGrid");
   if (!grid) return;
@@ -1049,7 +1173,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupBurgerMenu();
   setupLoginModal();
   setupClicks();
-  setupCommentsToggle(); // ✅ bunu ekle
+
+  setupCheckoutBtn();   
+  await renderCartPage(); 
 
   try {
     await renderAll();
