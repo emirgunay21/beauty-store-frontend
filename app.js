@@ -79,19 +79,34 @@ function setupBurgerMenu() {
   });
 }
 
+function readComments(productId) {
+  try {
+    const all = JSON.parse(localStorage.getItem("commentsByProduct")) || {};
+    return Array.isArray(all[productId]) ? all[productId] : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeComments(productId, list) {
+  const all = (() => {
+    try { return JSON.parse(localStorage.getItem("commentsByProduct")) || {}; }
+    catch { return {}; }
+  })();
+
+  all[productId] = list;
+  localStorage.setItem("commentsByProduct", JSON.stringify(all));
+}
 function setupLoginModal() {
   const navUser = document.getElementById("navUser");
   const mobileUserBtn = document.getElementById("mobileUserBtn");
-
   const navCart = document.getElementById("navCart");
   const mobileCartBtn = document.getElementById("mobileCartBtn");
-
   const modal = document.getElementById("loginModal");
   const emailEl = document.getElementById("loginEmail");
   const passEl = document.getElementById("loginPass");
   const btn = document.getElementById("loginBtn");
   const msg = document.getElementById("loginMsg");
-
   const burgerBtn = document.getElementById("burgerBtn");
   const mobileMenu = document.getElementById("mobileMenu");
   const overlay = document.getElementById("menuOverlay");
@@ -591,6 +606,24 @@ function setupClicks() {
 
   });
 }
+function buildStarsHTML(rating, size = 24) {
+  const r = Math.max(0, Math.min(5, Number(rating) || 0));
+  const full = Math.floor(r);
+  const half = (r - full) >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+
+  let html = "";
+  for (let i = 0; i < full; i++) {
+    html += `<img src="Star 1.png" style="width:${size}px;height:${size}px;" alt="star">`;
+  }
+  if (half) {
+    html += `<img src="Star 5.png" style="width:${size}px;height:${size}px;" alt="half">`;
+  }
+  for (let i = 0; i < empty; i++) {
+    html += `<img src="Starempty.png" style="width:${size}px;height:${size}px;" alt="empty">`;
+  }
+  return html;
+}
 
 async function renderProductDetails() {
   const root = document.getElementById("productDetailsRoot");
@@ -605,18 +638,21 @@ async function renderProductDetails() {
 
   try {
     const p = await getJSON(`https://dummyjson.com/products/${encodeURIComponent(id)}`);
+    await renderRelatedProducts(p);
+
+    // ------------------------------
+    // 1) ÖNCE sayfa iskeletini bas (root.innerHTML)
+    // ------------------------------
     const thumbs = (p.images || []).slice(0, 4);
 
-    // Beauty ise varyantları göster
-    const cat = String(p.category || "").toLowerCase();
-    const isBeauty = ["beauty", "fragrances", "skin-care"].includes(cat);
+    const catLower = String(p.category || "").toLowerCase();
+    const isBeauty = ["beauty", "fragrances", "skin-care"].includes(catLower);
 
     const shadeOptions = [
       { key: "01", name: "Light" },
       { key: "02", name: "Medium" },
       { key: "03", name: "Dark" },
     ];
-
     const sizeOptions = ["30ml", "50ml", "100ml"];
 
     root.innerHTML = `
@@ -631,6 +667,7 @@ async function renderProductDetails() {
         <div class="productPageDetailsMobileContent">
           <div class="productPageDetailsMobileText">
             <h1 style="font-size:40px;font-weight:bold;margin:0;">${p.title}</h1>
+
             <div class="productPageDetailsMobileText2">
               <p style="font-size:32px;margin:0;">$${p.price}</p>
               ${p.discountPercentage ? `
@@ -697,7 +734,170 @@ async function renderProductDetails() {
       </div>
     `;
 
-    // ✅ seçimi yönet
+    // ------------------------------
+    // 2) Root basıldıktan SONRA: Details section (senin mevcut HTML id'lerin)
+    // ------------------------------
+    renderDetailsSection(p);
+
+    // ------------------------------
+    // 3) Breadcrumbs (root dışındaysa da sorun yok)
+    // ------------------------------
+    const bc = document.getElementById("breadcrumbs");
+    if (bc) {
+      const catText = (p.category || "").toString().split("-").join(" ");
+      const title = (p.title || "").toString();
+
+      bc.innerHTML = `
+        <p style="color:#A4A4A4;cursor:pointer;" data-bc="home">Home</p>
+        <img src="Arrowright.png" alt="">
+        <p style="color:#A4A4A4;cursor:pointer;" data-bc="catalog">Catalog</p>
+        <img src="Arrowright.png" alt="">
+        <p style="color:#A4A4A4;cursor:pointer;" data-bc="category">${catText}</p>
+        <img src="Arrowright.png" alt="">
+        <p>${title}</p>
+      `;
+
+      bc.querySelector("[data-bc='home']")?.addEventListener("click", () => {
+        window.location.href = "Home.html";
+      });
+
+      bc.querySelector("[data-bc='catalog']")?.addEventListener("click", () => {
+        window.location.href = "ProductPage.html?category=beauty";
+      });
+
+      bc.querySelector("[data-bc='category']")?.addEventListener("click", () => {
+        window.location.href = `ProductPage.html?category=${encodeURIComponent(p.category)}`;
+      });
+    }
+
+    // ------------------------------
+    // 4) Reviews rating number + stars
+    // ------------------------------
+    const reviewsBox = document.querySelector(".productPageFiltersMobileRewiews");
+    const ratingNumberEl = reviewsBox?.querySelector(".productPageFiltersMobileRewiewsRating1 h1");
+    if (ratingNumberEl) ratingNumberEl.textContent = (p.rating ?? "-").toString();
+
+    const ratingStarsEl = reviewsBox?.querySelector(".productPageFiltersMobileRewiewsRatingStars");
+    if (ratingStarsEl) ratingStarsEl.innerHTML = buildStarsHTML(p.rating, 24);
+
+    // ------------------------------
+    // 5) Comments: seed + stored + render (AVATAR FIX)
+    // ------------------------------
+    const commentsRoot = document.getElementById("commentsRoot");
+    const input = document.getElementById("commentInput");
+    const starsSel = document.getElementById("commentStars");
+    const sendBtn = document.getElementById("commentSubmit");
+
+    // seed yorumlar (avatar ekledik)
+    const beautyComments = [
+      { name: "Grace Carey", stars: 4.5, text: "Texture is smooth and lightweight. Blends easily and looks natural all day. Great for daily makeup.", pics: [], avatar: "gracepic.png" },
+      { name: "Ronald Richards", stars: 5, text: "Nice packaging and the scent is pleasant (not too strong). Good value for the price.", pics: [], avatar: "ronaldpic.png" },
+      { name: "Darcy King", stars: 4, text: "Color payoff is good, but I’d recommend moisturizing first. Overall I’m happy with it.", pics: [], avatar: "darcypic.png" }
+    ];
+
+    const phoneComments = [
+      { name: "Grace Carey", stars: 4.5, text: "Fast delivery and the device looks great. Performance is solid and battery lasts long.", pics: [], avatar: "gracepic.png" },
+      { name: "Ronald Richards", stars: 5, text: "Storage is great and the build feels premium. Highly recommended.", pics: [], avatar: "ronaldpic.png" },
+      { name: "Darcy King", stars: 4, text: "Camera quality is good, but low-light could be better. Still a nice purchase.", pics: [], avatar: "darcypic.png" }
+    ];
+
+    const seedList = isBeauty ? beautyComments : phoneComments;
+
+    function pickFallbackAvatar(name) {
+      const n = String(name || "").toLowerCase();
+      if (n.includes("grace")) return "gracepic.png";
+      if (n.includes("ronald")) return "ronaldpic.png";
+      if (n.includes("darcy")) return "darcypic.png";
+      return "User.png";
+    }
+
+    function renderComments(listToRender) {
+      if (!commentsRoot) return;
+
+      commentsRoot.innerHTML = listToRender.map((c, idx) => {
+        const cls =
+          idx === 0 ? "reviewAndCommentsGrace" :
+          idx === 1 ? "reviewAndCommentsRonald" :
+          "reviewAndCommentsDarcy";
+
+        const avatarSrc = c.avatar || pickFallbackAvatar(c.name);
+
+        return `
+          <div class="${cls}">
+            <img src="${avatarSrc}" style="width:48px;height:48px;margin-left:16px;margin-top:24px;" alt="User">
+
+            <div class="reviewAndCommentsGraceText">
+              <p style="font-size:17px;font-weight:bold;margin:0px;margin-left:16px;">${c.name}</p>
+
+              <div class="reviewAndCommentsGraceTextStars">
+                ${buildStarsHTML(c.stars, 16)}
+              </div>
+
+              <div class="reviewAndCommentsGraceComment">
+                <p style="font-size:17px;color:#7E7E7E">${c.text}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    if (commentsRoot) {
+      const stored = readComments(String(p.id)); // user yorumları
+      const merged = [...stored, ...seedList];   // önce user, sonra seed
+      renderComments(merged);
+    }
+
+    // Yorum gönderme (login kontrol + avatar User.png)
+    if (sendBtn && !sendBtn.dataset.bound) {
+      sendBtn.dataset.bound = "1";
+
+      sendBtn.addEventListener("click", () => {
+        const text = (input?.value || "").trim();
+        const stars = Number(starsSel?.value || 5);
+
+        if (!text) {
+          alert("Yorum boş olamaz.");
+          return;
+        }
+
+        const user = (() => {
+          try { return JSON.parse(localStorage.getItem("user")); }
+          catch { return null; }
+        })();
+
+        if (!user?.email) {
+          alert("Yorum yapmak için giriş yapmalısın.");
+          document.getElementById("navUser")?.click();
+          return;
+        }
+
+        const storedNow = readComments(String(p.id));
+        storedNow.unshift({
+          name: user.email,
+          stars,
+          text,
+          pics: [],
+          avatar: "User.png"
+        });
+
+        writeComments(String(p.id), storedNow);
+
+        if (input) input.value = "";
+
+        const mergedNow = [...storedNow, ...seedList];
+        renderComments(mergedNow);
+      });
+    }
+
+    // ------------------------------
+    // 6) View more / View less toggle (EN SONRA)
+    // ------------------------------
+    setupCommentsToggle();
+
+    // ------------------------------
+    // 7) Beauty varyant seçimi + AddToCart (root basıldıktan sonra bağla)
+    // ------------------------------
     let selectedShade = null;
     let selectedSize = null;
 
@@ -717,25 +917,20 @@ async function renderProductDetails() {
       bindPills("shadeRow", "shade", (v) => selectedShade = v);
       bindPills("sizeRow", "size", (v) => selectedSize = v);
 
-      // varsayılan seçili olsun istersen:
       const firstShade = document.querySelector("#shadeRow .pillBtn");
       if (firstShade) firstShade.click();
       const firstSize = document.querySelector("#sizeRow .pillBtn");
       if (firstSize) firstSize.click();
     }
 
-    // ✅ Add to cart: seçilen varyantları da yaz
     const addBtn = document.getElementById("addToCartBtn");
     addBtn?.addEventListener("click", () => {
-      // stock 0 ise ekletme (istersen)
       if (Number(p.stock || 0) <= 0) {
         alert("Stok yok.");
         return;
       }
 
       const cart = readCart();
-
-      // Aynı ürün ama farklı varyant => ayrı satır olsun
       const key = `${p.id}|${selectedShade || ""}|${selectedSize || ""}`;
       const existing = cart.find(i => i.key === key);
 
@@ -757,18 +952,110 @@ async function renderProductDetails() {
     root.innerHTML = "<p style='padding:16px;'>Ürün yüklenemedi.</p>";
   }
 }
+async function renderRelatedProducts(p) {
+  const grid = document.getElementById("relatedProductsGrid");
+  if (!grid) return;
 
-// ---------- init ----------
+  try {
+    const cat = encodeURIComponent(p.category || "");
+    if (!cat) {
+      grid.innerHTML = "";
+      return;
+    }
+
+    const data = await getJSON(`https://dummyjson.com/products/category/${cat}?limit=12`);
+    let list = (data.products || []).filter(x => Number(x.id) !== Number(p.id));
+
+    // 4 ürün yeter
+    list = list.slice(0, 4);
+
+    // 2'li satır mantığı (senin diğer grid'lerin gibi)
+    let html = "";
+    for (let i = 0; i < list.length; i += 2) {
+      const left = list[i];
+      const right = list[i + 1];
+
+      html += `
+        <div class="ProductResultItems">
+          <div class="productResultItemIphone">
+            <img src="${left.thumbnail}" style="width:104px;height:104px;" alt="${left.title}">
+            <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${left.title}</h2>
+            <p style="font-size:24px;color:black;margin:0;">$${left.price}</p>
+            <button data-go-detail="1" data-product-id="${left.id}"
+              style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
+              Buy Now
+            </button>
+          </div>
+
+          ${right ? `
+          <div class="productResultItemIphone">
+            <img src="${right.thumbnail}" style="width:104px;height:104px;" alt="${right.title}">
+            <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${right.title}</h2>
+            <p style="font-size:24px;color:black;margin:0;">$${right.price}</p>
+            <button data-go-detail="1" data-product-id="${right.id}"
+              style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
+              Buy Now
+            </button>
+          </div>
+          ` : ""}
+        </div>
+      `;
+    }
+
+    grid.innerHTML = html;
+  } catch (e) {
+    console.error("Related products error:", e);
+    grid.innerHTML = "";
+  }
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value ?? "-";
+}
+
+function renderDetailsSection(p) {
+  setText("pdDetailsText", p.description || "");
+
+  setText("pdSpec1", p.brand || "-");
+  setText("pdSpec2", p.category || "-");
+  setText("pdSpec3", (p.rating ?? "-").toString());
+  setText("pdSpec4", Number(p.stock || 0) > 0 ? `${p.stock} pcs` : "Out of stock");
+  setText("pdSpec5", `$${p.price}`);
+
+  const extra = document.getElementById("pdExtraList");
+  if (extra) {
+    const tags = Array.isArray(p.tags) ? p.tags : [];
+    extra.innerHTML = tags.length
+      ? tags.map(t => `<p style="font-size: 15px;color: black;font-weight: bold;margin: 0px;">${String(t)}</p>`).join("")
+      : `<p style="font-size: 15px;color: black;font-weight: bold;margin: 0px;">-</p>`;
+  }
+
+  setText("pdCpu1", p.warrantyInformation || "-");
+  setText("pdCpu2", p.shippingInformation || "-");
+}
+function setupCommentsToggle() {
+  const root = document.getElementById("commentsRoot");
+  const btn = document.getElementById("commentsToggleBtn");
+  if (!root || !btn) return;
+
+  btn.addEventListener("click", () => {
+    const opened = root.classList.toggle("expanded");
+    btn.textContent = opened ? "View less" : "View more";
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
-  setupBurgerMenu();   
-  setupLoginModal();  
+  setupBurgerMenu();
+  setupLoginModal();
   setupClicks();
+  setupCommentsToggle(); // ✅ bunu ekle
 
   try {
     await renderAll();
-     await renderProductDetails();
-    
+    await renderProductDetails();
   } catch (e) {
     console.error(e);
   }
 });
+

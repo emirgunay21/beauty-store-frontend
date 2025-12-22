@@ -80,19 +80,19 @@
   </div>
 </div>
 <div class="menu-overlay" id="menuOverlay"></div>
-<div class="Breadcrumbs">
-            <p style="color: #A4A4A4;">Home</p>
-            <img src="Arrowright.png" alt="">
-            <p style="color: #A4A4A4;">Catalog</p>
-            <img src="Arrowright.png" alt="">
-            <p style="color: #A4A4A4;">Beauty</p>
-            <img src="Arrowright.png" alt="">
-            <p style="color: #A4A4A4;">Apple</p>
-            <img src="Arrowright.png" alt="">
-            <p>Mascara</p>
-            
-
-        </div>
+<div class="Breadcrumbs" id="breadcrumbs">
+  <!-- 
+  <p id="bcHome" style="color:#A4A4A4;cursor:pointer;">Home</p>
+  <img src="Arrowright.png" alt="">
+  <p id="bcCatalog" style="color:#A4A4A4;cursor:pointer;">Catalog</p>
+  <img src="Arrowright.png" alt="">
+  <p id="bcCategory" style="color:#A4A4A4;">-</p>
+  <img src="Arrowright.png" alt="">
+  <p id="bcBrand" style="color:#A4A4A4;">-</p>
+  <img src="Arrowright.png" alt="">
+  <p id="bcTitle">-</p>
+-->
+</div>
         <!--
     <div class="productPageDetailsMobileMedia">
         <div class="productPageFiltersMobileTop">
@@ -230,42 +230,34 @@
   <div class="productPageDetailsMobileDetailContentMedia">
   <h1 style="font-size: 24px;font-weight: bold;margin-top: 128px;">Details</h1>
     <div class="productPageDetailsMobileDetailContentText">
-      <p style="font-size: 14px;color: #6C6C6C;">Just as a book is judged by its cover, the first thing you notice when you pick up a modern smartphone is the display. Nothing surprising, because advanced technologies allow you to practically level the display frames and cutouts for the front camera and speaker, leaving no room for bold design solutions. And how good that in such realities Apple everything is fine with displays. Both critics and mass consumers always praise the quality of the picture provided by the products of the Californian brand. And last year's 6.7-inch Retina panels, which had ProMotion, caused real admiration for many.</p>
+      <p id="pdDetailsText" style="font-size: 14px;color: #6C6C6C;"></p>
   </div>
     
     <div class="productPageDetailsMobileDetailContentScreen">
-      <h1 style="font-size: 20px;font-weight: bold;">Screen</h1>
+      <h1 style="font-size: 20px;font-weight: bold;">Product Info</h1>
       <div class="productPageDetailsMobileDetailContentScreenText">
         <div class="productPageDetailsMobileDetailContentScreenText1">
-          <p style="font-size: 15px;color: black;font-weight: bold;">Screen diagonal</p>
-          <p style="font-size: 15px;color: black;font-weight: bold;">6.7"</p>
-        
-
+      <p style="font-size: 15px;color: black;font-weight: bold;">Brand</p>
+      <p id="pdSpec1" style="font-size: 15px;color: black;font-weight: bold;"></p>
+    </div>
+       <div class="productPageDetailsMobileDetailContentScreenText1">
+      <p style="font-size: 15px;color: black;font-weight: bold;">Category</p>
+      <p id="pdSpec2" style="font-size: 15px;color: black;font-weight: bold;"></p>
     </div>
     <div class="productPageDetailsMobileDetailContentScreenText1">
-          <p style="font-size: 15px;color: black;font-weight: bold;">The screen resolution</p>
-          <p style="font-size: 15px;color: black;font-weight: bold;">2796x1290</p>
-        
-
+      <p style="font-size: 15px;color: black;font-weight: bold;">Rating</p>
+      <p id="pdSpec3" style="font-size: 15px;color: black;font-weight: bold;"></p>
+    </div>
+     <div class="productPageDetailsMobileDetailContentScreenText1">
+      <p style="font-size: 15px;color: black;font-weight: bold;">Stock</p>
+      <p id="pdSpec4" style="font-size: 15px;color: black;font-weight: bold;"></p>
     </div>
     <div class="productPageDetailsMobileDetailContentScreenText1">
-          <p style="font-size: 15px;color: black;font-weight: bold;">The screen refresh rate</p>
-          <p style="font-size: 15px;color: black;font-weight: bold;">120 Hz</p>
-        
-
+      <p style="font-size: 15px;color: black;font-weight: bold;">Tags</p>
+      <div id="pdExtraList" class="productPageDetailsMobileDetailContentScreenText1Extra"></div>
     </div>
-    <div class="productPageDetailsMobileDetailContentScreenText1">
-          <p style="font-size: 15px;color: black;font-weight: bold;">The pixel density</p>
-          <p style="font-size: 15px;color: black;font-weight: bold;">460 ppi</p>
-        
-
-    </div>
-    <div class="productPageDetailsMobileDetailContentScreenText1">
-          <p style="font-size: 15px;color: black;font-weight: bold;">Screen type</p>
-          <p style="font-size: 15px;color: black;font-weight: bold;">OLED</p>
-        
-
-    </div>
+    
+   <!-- 
     <div class="productPageDetailsMobileDetailContentScreenText1">
           <p style="font-size: 15px;color: black;font-weight: bold;">Additionally</p>
           <div class="productPageDetailsMobileDetailContentScreenText1Extra">
@@ -278,18 +270,20 @@
     </div>
     
   </div>
+-->
   </div>
   </div>
   <div class="productPageDetailsMobileDetailContentBottom">
-    <h1 style="font-size: 24px;font-weight: bold;margin-top: 128px;">CPU</h1>
+    <h1 style="font-size: 24px;font-weight: bold;margin-top: 128px;">Shipping & Warranty</h1>
+
     <div class="productPageDetailsMobileDetailContentBottomText">
       <div class="productPageDetailsMobileDetailContentBottomText1">
-      <p style="font-size: 15px;color: black;font-weight: bold;">CPU</p>
-          <p style="font-size: 15px;color: black;font-weight: bold;">A16 Bionic</p>
+      <p style="font-size: 15px;color: black;font-weight: bold;">Warranty</p>
+<p id="pdCpu1" style="font-size: 15px;color: black;font-weight: bold;"></p>
     </div>
     <div class="productPageDetailsMobileDetailContentBottomText1">
-      <p style="font-size: 15px;color: black;font-weight: bold;">Number of cores</p>
-          <p style="font-size: 15px;color: black;font-weight: bold;">6</p>
+      <p style="font-size: 15px;color: black;font-weight: bold;">Shipping</p>
+<p id="pdCpu2" style="font-size: 15px;color: black;font-weight: bold;"></p>
     </div>
     </div>
 </div>
@@ -306,11 +300,14 @@
     <p style="font-size: 15px;color: gray;margin: 0px;">of 125 reviews</p>
     </div>
     <div class="productPageFiltersMobileRewiewsRatingStars">
+
+<!-- 
     <img src="Star 1.png" style="width:24px;height:24px;" alt="star">
     <img src="Star 1.png" style="width:24px;height:24px;" alt="star">
     <img src="Star 1.png" style="width:24px;height:24px;" alt="star">
     <img src="Star 1.png" style="width:24px;height:24px;" alt="star">
     <img src="Star 5.png" style="width:24px;height:24px;" alt="star">
+-->
     </div>
     
 
@@ -345,11 +342,28 @@
       </div>
       </div>
       <div class="review-comment-box">
-  <textarea placeholder="Leave Comment"></textarea>
+  <textarea id="commentInput" placeholder="Leave Comment"></textarea>
 </div>
+
+<div class="reviewCommentActions" style="width:344px;margin-top:16px;display:flex;gap:12px;align-items:center;">
+  <select id="commentStars" style="height:44px;border:1px solid #D0D0D0;border-radius:8px;padding:0 12px;">
+    <option value="5">5 ⭐</option>
+    <option value="4">4 ⭐</option>
+    <option value="3">3 ⭐</option>
+    <option value="2">2 ⭐</option>
+    <option value="1">1 ⭐</option>
+  </select>
+
+  <button id="commentSubmit"
+    style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #111;background:#111;color:#fff;">
+    Send
+  </button>
+</div>
+
     
   </div>
-  <div class="reviewAndComments">
+  <div class="reviewAndComments" id="commentsRoot">
+    <!--
 <div class="reviewAndCommentsGrace">
     <img src="gracepic.png" style="width:48px;height:48px;margin-left: 16px;margin-top: 24px;" alt="User">
     <div class="reviewAndCommentsGraceText">
@@ -423,12 +437,16 @@
 </div>
     </div>
     </div>
-         <button style="width: 208px;height: 48px;background-color: white;;border-radius: 8px;border: 1px solid black;color: black;font-size: 16px;margin-top: 24px;margin-left: 68px;">Wiew More</button>
+     -->    
   </div>
+<button id="commentsToggleBtn"
+  style="width:344px;height:56px;border-radius:8px;border:1px solid #111;background:#fff;margin-top:16px;">
+  View more
+</button>
   </div>
 <div class="relatedProducts">
   <h1 style="font-size: 24px;font-weight: bold;">Related Products</h1>
-
+<!-- 
 <div class="productPageFiltersMobileBottom">
 <div class="productPageFiltersMobileBottomTop">
   <div class="productPageFiltersMobileBottomTop1">
@@ -466,6 +484,8 @@
 </div>
 </div>
 </div>
+-->
+<div class="productPageFiltersMobileBottom" id="relatedProductsGrid"></div>
 </div>
  <div class="footer">
     <div class="footerContent">
