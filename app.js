@@ -293,7 +293,10 @@ async function renderAll() {
         <img src="${p[3]?.thumbnail || ""}" style="width:330px;height:200px;margin-top:40px">
         <h2 style="font-size:36px;margin:24px;color:black">${p[3]?.title || "Product"}</h2>
         <p style="font-size:19px;color:gray">${p[3]?.description || ""}</p>
-        <button style="width:343px;height:56px;border:2px solid black">Shop Now</button>
+        <button class="shopNowBtn" data-category="beauty"
+  style="width:343px;height:56px;border:2px solid black">
+  Shop Now
+</button>
       </div>
     `;
   }
@@ -372,7 +375,10 @@ async function renderAll() {
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:black">${p[0].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[0].description}</p>
-          <button style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">Shop Now</button>
+          <button class="shopNowBtn" data-category="beauty"
+  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+  Shop Now
+</button>
         </div>
       </div>
       <div class="bigBanner bigBanner-desktop-only">
@@ -380,7 +386,10 @@ async function renderAll() {
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:black">${p[0].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[0].description}</p>
-          <button style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">Shop Now</button>
+          <button class="shopNowBtn" data-category="beauty"
+  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+  Shop Now
+</button>
         </div>
       </div>
       <div class="bigBanner bigBanner-desktop-only">
@@ -388,7 +397,10 @@ async function renderAll() {
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:black">${p[1].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[1].description}</p>
-          <button style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">Shop Now</button>
+          <button class="shopNowBtn" data-category="beauty"
+  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+  Shop Now
+</button>
         </div>
       </div>
       <div class="bigBanner bigBanner-desktop-only">
@@ -396,7 +408,10 @@ async function renderAll() {
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:black">${p[2].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[2].description}</p>
-          <button style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">Shop Now</button>
+          <button class="shopNowBtn" data-category="beauty"
+  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+  Shop Now
+</button>
         </div>
       </div>
       <div class="bigBanner bigBanner-desktop-only bigBanner-dark">
@@ -404,7 +419,10 @@ async function renderAll() {
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:white">${p[3].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[3].description}</p>
-          <button style="width:184px;height:56px;background:#2C2C2C;border:2px solid white;color:white;border-radius:8px;">Shop Now</button>
+          <button class="shopNowBtn" data-category="beauty"
+  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+  Shop Now
+</button>
         </div>
       </div>
     `;
@@ -421,9 +439,10 @@ async function renderAll() {
         <h1 style="font-size:72px;margin:0;color:#FFFFFF">Discover</h1>
         <h2 style="font-size:72px;margin:0;color:#FFFFFF">${p?.title || "Beauty Essentials"}</h2>
         <p style="font-size:19px;color:gray;margin:0;">${p?.description || ""}</p>
-        <button style="width:184px;height:56px;background-color:#211C24;border:2px solid white;color:white;margin-top:48px;border-radius:8px;">
-          Shop Now
-        </button>
+        <button class="shopNowBtn" data-category="beauty"
+  style="width:184px;height:56px;background-color:#211C24;border:2px solid white;color:white;margin-top:48px;border-radius:8px;">
+  Shop Now
+</button>
       </div>
 
       <div class="bannerTopimage">
@@ -1369,7 +1388,13 @@ function setupCommentsToggle() {
     btn.textContent = opened ? "View less" : "View more";
   });
 }
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".shopNowBtn");
+  if (!btn) return;
 
+  const category = btn.dataset.category || "beauty";
+  window.location.href = `ProductPage.html?category=${encodeURIComponent(category)}`;
+});
 document.addEventListener("DOMContentLoaded", async () => {
   setupBurgerMenu();
   setupLoginModal();

@@ -1935,7 +1935,9 @@ input[type="submit"]:active{
   overflow-y: auto;
   padding-right: 6px;
 }
-
+.mobile-menu-links a.active{
+  font-weight: 600;
+}
 @media (min-width: 1024px) {
   
   .banner{
