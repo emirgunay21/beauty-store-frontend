@@ -1,4 +1,4 @@
-// ---------- helpers ----------
+
 async function getJSON(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} -> ${url}`);
@@ -25,7 +25,7 @@ function updateCartBadge() {
   const cart = readCart();
   const totalQty = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
 
-  // Desktop badge
+  
   if (badgeDesktop) {
     badgeDesktop.textContent = totalQty;
     badgeDesktop.style.display = totalQty > 0 ? "inline-block" : "none";
@@ -147,7 +147,7 @@ function setupLoginModal() {
     }
   }
 
-  // Desktop user click => modal / logout
+ 
   navUser.addEventListener("click", () => {
     const user = getUser();
     if (!user) openModal();
@@ -184,7 +184,7 @@ function setupLoginModal() {
   if (mobileCartBtn) mobileCartBtn.addEventListener("click", () => window.location.href = "ShoppingCardMobile.html");
 
  
-  // ---------- modal close handlers ----------
+  
   modal.addEventListener("click", (e) => {
     if (e.target?.dataset?.close) closeModal();
   });
@@ -212,7 +212,7 @@ function setupLoginModal() {
 }
 
 
-// ---------- fetch render ----------
+
 async function renderAll() {
   updateCartBadge();
 
@@ -224,7 +224,7 @@ async function renderAll() {
   const mainBanner = document.getElementById("mainBanner");
   const productPageGrid = document.getElementById("productPageGrid");
 
-  // products (Home)
+  
   if (productsGrid) {
     const data = await getJSON("https://dummyjson.com/products?limit=8");
     productsGrid.innerHTML = data.products.map(p => `
@@ -246,7 +246,7 @@ async function renderAll() {
     `).join("");
   }
 
-  // discount (Home)
+  
   if (discountGrid) {
     const data2 = await getJSON("https://dummyjson.com/products?limit=4&skip=8");
     discountGrid.innerHTML = data2.products.map(p => `
@@ -266,7 +266,7 @@ async function renderAll() {
     `).join("");
   }
 
-  // banner bottom (Home)
+  
   if (bannerBottomGrid) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=4");
     const p = data.products || [];
@@ -301,7 +301,7 @@ async function renderAll() {
     `;
   }
 
-  // categories (Home)
+  
   if (categoriesGrid) {
     // ✅ click eventi sadece 1 kere ekle
     if (!categoriesGrid.dataset.bound) {
@@ -363,7 +363,7 @@ async function renderAll() {
     }
   }
 
-  // big banners (Home)
+  
   if (bigBannerWrapperGrid) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=4");
     const p = data.products || [];
@@ -428,7 +428,7 @@ async function renderAll() {
     `;
   }
 
-  // main banner (Home)
+ 
   if (mainBanner) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=1");
     const p = data.products?.[0];
@@ -454,7 +454,7 @@ async function renderAll() {
     `;
   }
 
-  // ✅ ProductPage ürünleri (ProductPage.html)
+  
   if (productPageGrid) {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -593,11 +593,11 @@ function applyDesktopBrandFilter() {
   renderProductPageGridDesktop(PRODUCTPAGE_VIEW);
 }
 
-// ---------- global click handlers ----------
+
 function setupClicks() {
   document.body.addEventListener("click", (e) => {
 
-    // 1) Detaya gitme (Buy Now)
+    
     const goDetailBtn = e.target.closest("button[data-go-detail='1']");
     if (goDetailBtn) {
       const id = Number(goDetailBtn.dataset.productId);
@@ -606,7 +606,7 @@ function setupClicks() {
       return;
     }
 
-    // 2) Sepete ekleme (Add to Cart)
+    
     const addCartBtn = e.target.closest("button[data-add-cart='1']");
     if (addCartBtn) {
       const id = Number(addCartBtn.dataset.productId);
@@ -659,9 +659,7 @@ async function renderProductDetails() {
     const p = await getJSON(`https://dummyjson.com/products/${encodeURIComponent(id)}`);
     await renderRelatedProducts(p);
 
-    // ------------------------------
-    // 1) ÖNCE sayfa iskeletini bas (root.innerHTML)
-    // ------------------------------
+    
     const thumbs = (p.images || []).slice(0, 4);
 
     const catLower = String(p.category || "").toLowerCase();
@@ -753,14 +751,10 @@ async function renderProductDetails() {
       </div>
     `;
 
-    // ------------------------------
-    // 2) Root basıldıktan SONRA: Details section (senin mevcut HTML id'lerin)
-    // ------------------------------
+    
     renderDetailsSection(p);
 
-    // ------------------------------
-    // 3) Breadcrumbs (root dışındaysa da sorun yok)
-    // ------------------------------
+  
     const bc = document.getElementById("breadcrumbs");
     if (bc) {
       const catText = (p.category || "").toString().split("-").join(" ");
@@ -789,9 +783,7 @@ async function renderProductDetails() {
       });
     }
 
-    // ------------------------------
-    // 4) Reviews rating number + stars
-    // ------------------------------
+   
     const reviewsBox = document.querySelector(".productPageFiltersMobileRewiews");
     const ratingNumberEl = reviewsBox?.querySelector(".productPageFiltersMobileRewiewsRating1 h1");
     if (ratingNumberEl) ratingNumberEl.textContent = (p.rating ?? "-").toString();
@@ -799,15 +791,13 @@ async function renderProductDetails() {
     const ratingStarsEl = reviewsBox?.querySelector(".productPageFiltersMobileRewiewsRatingStars");
     if (ratingStarsEl) ratingStarsEl.innerHTML = buildStarsHTML(p.rating, 24);
 
-    // ------------------------------
-    // 5) Comments: seed + stored + render (AVATAR FIX)
-    // ------------------------------
+  
     const commentsRoot = document.getElementById("commentsRoot");
     const input = document.getElementById("commentInput");
     const starsSel = document.getElementById("commentStars");
     const sendBtn = document.getElementById("commentSubmit");
 
-    // seed yorumlar (avatar ekledik)
+    
     const beautyComments = [
       { name: "Grace Carey", stars: 4.5, text: "Texture is smooth and lightweight. Blends easily and looks natural all day. Great for daily makeup.", pics: [], avatar: "gracepic.png" },
       { name: "Ronald Richards", stars: 5, text: "Nice packaging and the scent is pleasant (not too strong). Good value for the price.", pics: [], avatar: "ronaldpic.png" },
@@ -862,12 +852,12 @@ async function renderProductDetails() {
     }
 
     if (commentsRoot) {
-      const stored = readComments(String(p.id)); // user yorumları
-      const merged = [...stored, ...seedList];   // önce user, sonra seed
+      const stored = readComments(String(p.id)); 
+      const merged = [...stored, ...seedList];   
       renderComments(merged);
     }
 
-    // Yorum gönderme (login kontrol + avatar User.png)
+    
     if (sendBtn && !sendBtn.dataset.bound) {
       sendBtn.dataset.bound = "1";
 
@@ -909,14 +899,10 @@ async function renderProductDetails() {
       });
     }
 
-    // ------------------------------
-    // 6) View more / View less toggle (EN SONRA)
-    // ------------------------------
+    
     setupCommentsToggle();
 
-    // ------------------------------
-    // 7) Beauty varyant seçimi + AddToCart (root basıldıktan sonra bağla)
-    // ------------------------------
+  
     let selectedShade = null;
     let selectedSize = null;
 
@@ -1004,7 +990,7 @@ async function renderCartPage() {
     const lineTotal = price * qty;
     subtotal += lineTotal;
 
-    // varyant etiketi (beauty için)
+   
     const variantText = [
       item.shade ? `Shade: ${item.shade}` : "",
       item.size ? `Size: ${item.size}` : ""
@@ -1065,12 +1051,12 @@ listEl.classList.toggle("is-scroll", itemsCount >= 3);
 
     writeCart(cartNow);
     updateCartBadge();
-    renderCartPage(); // yeniden bas
-  }, { once: true }); // ⚠️ renderCartPage yeniden çağırdığı için burada once kullandım
+    renderCartPage(); 
+  }, { once: true }); 
 }
 
 function updateSummary(subtotal) {
-  // basit hesap: tax %2, shipping sabit 29 (subtotal 0 ise 0)
+  
   const tax = subtotal > 0 ? subtotal * 0.02 : 0;
   const ship = subtotal > 0 ? 29 : 0;
   const total = subtotal + tax + ship;
@@ -1109,10 +1095,10 @@ async function renderRelatedProducts(p) {
     const data = await getJSON(`https://dummyjson.com/products/category/${cat}?limit=12`);
     let list = (data.products || []).filter(x => Number(x.id) !== Number(p.id));
 
-    // 4 ürün yeter
+    
     list = list.slice(0, 4);
 
-    // 2'li satır mantığı (senin diğer grid'lerin gibi)
+    
     let html = "";
     for (let i = 0; i < list.length; i += 2) {
       const left = list[i];
@@ -1253,7 +1239,7 @@ function bindAddressActionsOnce() {
     const id = card.dataset.id;
     if (!id) return;
 
-    // 1) Delete
+   
     if (e.target.classList.contains("addrDelete")) {
       let list = readAddresses().filter(a => a.id !== id);
       writeAddresses(list);
@@ -1267,13 +1253,13 @@ function bindAddressActionsOnce() {
       return;
     }
 
-    // 2) Edit (şimdilik)
+    
     if (e.target.classList.contains("addrEdit")) {
       alert("Giris Yapmalisin🙂");
       return;
     }
 
-    // 3) Radio seçimi (kartın içine tıklayınca seçsin)
+    
     if (e.target.matches("input[type='radio']") || e.target.closest(".step1SelectAdressBlockHome")) {
       localStorage.setItem(LS_SELECTED, id);
       renderAddresses();
@@ -1287,46 +1273,46 @@ function bindStep1Nav() {
   if (!back || !next) return;
 
   back.addEventListener("click", () => {
-    // Sepete dön
+    
     window.location.href = "ShoppingCardMobile.html";
   });
 
   next.addEventListener("click", () => {
-    // Seçili adres var mı kontrol et
+    
     const selectedId = localStorage.getItem("selectedAddressId");
     if (!selectedId) {
       alert("Lütfen bir adres seç.");
       return;
     }
-    // Step 2 Shipping’e git
+   
     window.location.href = "Step2.html";
   });
 }
 function initStep2ShippingPage() {
   const back = document.getElementById("step2Back");
   const next = document.getElementById("step2Next");
-  if (!back || !next) return; // Step2 değilse çık
+  if (!back || !next) return; 
 
-  // Sayfa açılınca önceki seçim varsa onu işaretle
+  
   const saved = localStorage.getItem("selectedShippingId");
   if (saved) {
     const input = document.querySelector(`input[name="shipment"][value="${saved}"]`);
     if (input) input.checked = true;
   }
 
-  // Radio değişince kaydet
+
   document.querySelectorAll(`input[name="shipment"]`).forEach((r) => {
     r.addEventListener("change", () => {
       localStorage.setItem("selectedShippingId", r.value);
     });
   });
 
-  // Back: Step1
+ 
   back.addEventListener("click", () => {
     window.location.href = "step1.html";
   });
 
-  // Next: Step3 (shipping seçiliyse)
+
   next.addEventListener("click", () => {
     const picked = document.querySelector(`input[name="shipment"]:checked`);
     if (!picked) {
@@ -1347,10 +1333,9 @@ function initStep3PaymentPage() {
   });
 
   pay.addEventListener("click", () => {
-    // burada şimdilik "fake payment"
+    
     alert("Ödeme başarılı ✅");
-    // istersen success sayfasına yönlendirelim:
-    // window.location.href = "OrderSuccess.html";
+   
   });
 }
 function setText(id, value) {
@@ -1410,7 +1395,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error(e);
   }
 
-  // ✅ Step1 (Address)
+  productPageGrid
   if (document.getElementById("addressList")) {
     seedAddressesIfEmpty();
     renderAddresses();
@@ -1418,7 +1403,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     bindStep1Nav();
   }
 
-  // ✅ Step2 (Shipping)
+  
   initStep2ShippingPage();
   initStep3PaymentPage();
 });
