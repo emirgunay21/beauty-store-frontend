@@ -1318,7 +1318,22 @@ function initStep2ShippingPage() {
     window.location.href = "Step3.html";
   });
 }
+function initStep3PaymentPage() {
+  const back = document.getElementById("step3Back");
+  const pay = document.getElementById("step3Pay");
+  if (!back || !pay) return; // Step3 değilse çık
 
+  back.addEventListener("click", () => {
+    window.location.href = "Step2.html";
+  });
+
+  pay.addEventListener("click", () => {
+    // burada şimdilik "fake payment"
+    alert("Ödeme başarılı ✅");
+    // istersen success sayfasına yönlendirelim:
+    // window.location.href = "OrderSuccess.html";
+  });
+}
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value ?? "-";
@@ -1380,4 +1395,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ✅ Step2 (Shipping)
   initStep2ShippingPage();
+  initStep3PaymentPage();
 });
