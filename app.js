@@ -1132,6 +1132,158 @@ async function renderRelatedProducts(p) {
     grid.innerHTML = "";
   }
 }
+const LS_KEY = "addresses";
+const LS_SELECTED = "selectedAddressId";
+
+function readAddresses() {
+  try {
+    const data = JSON.parse(localStorage.getItem(LS_KEY));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeAddresses(list) {
+  localStorage.setItem(LS_KEY, JSON.stringify(list));
+}
+
+function seedAddressesIfEmpty() {
+  const list = readAddresses();
+  if (list.length) return;
+
+  const seeded = [
+    {
+      id: "addr1",
+      title: "2118 Thornridge",
+      tag: "Home",
+      line: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
+      phone: "(209) 555-0104"
+    },
+    {
+      id: "addr2",
+      title: "11 Oxford Street",
+      tag: "Office",
+      line: "11 Oxford Street, London W1D 2LT",
+      phone: "(415) 555-0133"
+    }
+  ];
+
+  writeAddresses(seeded);
+  localStorage.setItem(LS_SELECTED, seeded[0].id);
+}
+
+function renderAddresses() {
+  const listEl = document.getElementById("addressList");
+  if (!listEl) return;
+
+  const addresses = readAddresses();
+  const selectedId =
+    localStorage.getItem(LS_SELECTED) ||
+    (addresses[0] && addresses[0].id);
+
+  if (!addresses.length) {
+    listEl.innerHTML =
+      `<p style="margin:12px 0;color:#6C6C6C;">No saved address.</p>`;
+    return;
+  }
+
+  listEl.innerHTML = addresses
+    .map(
+      (a) => `
+    <div class="step1SelectAdressBlockHome" data-id="${a.id}">
+      <div class="step1SelectAdressBlockHomeTop">
+        <div class="step1SelectAdressBlockHomeRadio">
+          <input type="radio" name="address" ${a.id === selectedId ? "checked" : ""}>
+          <p style="margin:0px;font-size:16px;font-weight:bold;">${a.title}</p>
+          <img src="Tag.png" style="width:51px;height:22px;margin-left:8px;" alt="${a.tag}">
+        </div>
+
+        <div class="step1SelectAdressBlockHomeText">
+          <p style="margin:0px;font-size:16px;font-weight:bold;">${a.line}</p>
+          <p style="margin:0px;font-size:14px;">${a.phone}</p>
+        </div>
+      </div>
+
+      <div class="step1SelectAdressBlockHomeicons">
+        <img class="addrEdit" src="To edit.png" style="width:24px;height:24px;margin-right:16px;cursor:pointer;" alt="edit">
+        <img class="addrDelete" src="Close.png" style="width:24px;height:24px;cursor:pointer;" alt="delete">
+      </div>
+    </div>
+  `
+    )
+    .join("");
+}
+
+function initStep1AddressPage() {
+  const listEl = document.getElementById("addressList");
+  if (!listEl) return; 
+
+  seedAddressesIfEmpty();
+  renderAddresses();
+}
+function bindAddressActionsOnce() {
+  const host = document.getElementById("addressList");
+  if (!host || host.dataset.bound === "1") return;
+  host.dataset.bound = "1";
+
+  host.addEventListener("click", (e) => {
+    const card = e.target.closest(".step1SelectAdressBlockHome");
+    if (!card) return;
+
+    const id = card.dataset.id;
+    if (!id) return;
+
+    // 1) Delete
+    if (e.target.classList.contains("addrDelete")) {
+      let list = readAddresses().filter(a => a.id !== id);
+      writeAddresses(list);
+
+      const selected = localStorage.getItem(LS_SELECTED);
+      if (selected === id) {
+        localStorage.setItem(LS_SELECTED, list[0]?.id || "");
+      }
+
+      renderAddresses();
+      return;
+    }
+
+    // 2) Edit (şimdilik)
+    if (e.target.classList.contains("addrEdit")) {
+      alert("Giris Yapmalisin🙂");
+      return;
+    }
+
+    // 3) Radio seçimi (kartın içine tıklayınca seçsin)
+    if (e.target.matches("input[type='radio']") || e.target.closest(".step1SelectAdressBlockHome")) {
+      localStorage.setItem(LS_SELECTED, id);
+      renderAddresses();
+      return;
+    }
+  });
+}
+function bindStep1Nav() {
+  const back = document.getElementById("step1Back");
+  const next = document.getElementById("step1Next");
+  if (!back || !next) return;
+
+  back.addEventListener("click", () => {
+    // Sepete dön
+    window.location.href = "ShoppingCardMobile.html";
+  });
+
+  next.addEventListener("click", () => {
+    // Seçili adres var mı kontrol et
+    const selectedId = localStorage.getItem("selectedAddressId");
+    if (!selectedId) {
+      alert("Lütfen bir adres seç.");
+      return;
+    }
+    // Step 2 Shipping’e git
+    window.location.href = "Step2.html";
+  });
+}
+
 
 function setText(id, value) {
   const el = document.getElementById(id);
@@ -1183,5 +1335,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (e) {
     console.error(e);
   }
+  initStep1AddressPage();
+  if (document.getElementById("addressList")) {
+  seedAddressesIfEmpty();   // placeholder kalacaksa
+  renderAddresses();
+  bindAddressActionsOnce();
+  bindStep1Nav();
+}
 });
 
