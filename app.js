@@ -1283,7 +1283,41 @@ function bindStep1Nav() {
     window.location.href = "Step2.html";
   });
 }
+function initStep2ShippingPage() {
+  const back = document.getElementById("step2Back");
+  const next = document.getElementById("step2Next");
+  if (!back || !next) return; // Step2 değilse çık
 
+  // Sayfa açılınca önceki seçim varsa onu işaretle
+  const saved = localStorage.getItem("selectedShippingId");
+  if (saved) {
+    const input = document.querySelector(`input[name="shipment"][value="${saved}"]`);
+    if (input) input.checked = true;
+  }
+
+  // Radio değişince kaydet
+  document.querySelectorAll(`input[name="shipment"]`).forEach((r) => {
+    r.addEventListener("change", () => {
+      localStorage.setItem("selectedShippingId", r.value);
+    });
+  });
+
+  // Back: Step1
+  back.addEventListener("click", () => {
+    window.location.href = "step1.html";
+  });
+
+  // Next: Step3 (shipping seçiliyse)
+  next.addEventListener("click", () => {
+    const picked = document.querySelector(`input[name="shipment"]:checked`);
+    if (!picked) {
+      alert("Lütfen bir shipment method seç.");
+      return;
+    }
+    localStorage.setItem("selectedShippingId", picked.value);
+    window.location.href = "Step3.html";
+  });
+}
 
 function setText(id, value) {
   const el = document.getElementById(id);
@@ -1326,8 +1360,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupLoginModal();
   setupClicks();
 
-  setupCheckoutBtn();   
-  await renderCartPage(); 
+  setupCheckoutBtn();
+  await renderCartPage();
 
   try {
     await renderAll();
@@ -1335,12 +1369,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (e) {
     console.error(e);
   }
-  initStep1AddressPage();
-  if (document.getElementById("addressList")) {
-  seedAddressesIfEmpty();   // placeholder kalacaksa
-  renderAddresses();
-  bindAddressActionsOnce();
-  bindStep1Nav();
-}
-});
 
+  // ✅ Step1 (Address)
+  if (document.getElementById("addressList")) {
+    seedAddressesIfEmpty();
+    renderAddresses();
+    bindAddressActionsOnce();
+    bindStep1Nav();
+  }
+
+  // ✅ Step2 (Shipping)
+  initStep2ShippingPage();
+});
