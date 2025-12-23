@@ -1255,16 +1255,23 @@ function bindAddressActionsOnce() {
 
     
     if (e.target.classList.contains("addrEdit")) {
-      alert("Giris Yapmalisin🙂");
-      return;
-    }
+  // ✅ giriş kontrolü
+  let user = null;
+  try { user = JSON.parse(localStorage.getItem("user")); } catch {}
+  if (!user?.email) {
+    alert("Düzenlemek için giriş yapmalısın.");
+    document.getElementById("navUser")?.click(); // login modalı aç
+    return;
+  }
 
-    
-    if (e.target.matches("input[type='radio']") || e.target.closest(".step1SelectAdressBlockHome")) {
-      localStorage.setItem(LS_SELECTED, id);
-      renderAddresses();
-      return;
-    }
+  // ✅ popup aç
+  const list = readAddresses();
+  const addr = list.find(a => a.id === id);
+  if (!addr) return;
+
+  openAddressEditModal(addr);
+  return;
+}
   });
 }
 function bindStep1Nav() {
@@ -1323,6 +1330,109 @@ function initStep2ShippingPage() {
     window.location.href = "Step3.html";
   });
 }
+// ---------- Address Edit Modal ----------
+function ensureAddressEditModal() {
+  if (document.getElementById("addressEditModal")) return;
+
+  document.body.insertAdjacentHTML("beforeend", `
+    <div class="modal" id="addressEditModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close="1"></div>
+
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="addrEditTitle">
+        <div class="modal-head">
+          <h3 id="addrEditTitle" style="margin:0;">Edit Address</h3>
+          <button class="modal-x" type="button" data-close="1" aria-label="Close">×</button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="addrEditId">
+
+          <label class="modal-label">Title</label>
+          <input id="addrEditTitleInput" class="modal-input" type="text" placeholder="2118 Thornridge">
+
+          <label class="modal-label">Tag</label>
+          <input id="addrEditTagInput" class="modal-input" type="text" placeholder="Home / Office">
+
+          <label class="modal-label">Address Line</label>
+          <input id="addrEditLineInput" class="modal-input" type="text" placeholder="Street, City...">
+
+          <label class="modal-label">Phone</label>
+          <input id="addrEditPhoneInput" class="modal-input" type="text" placeholder="(555) 555-5555">
+
+          <button id="addrEditSaveBtn" class="modal-btn" type="button">Save</button>
+          <p id="addrEditMsg" style="margin:12px 0 0 0;font-size:12px;opacity:.8;"></p>
+        </div>
+      </div>
+    </div>
+  `);
+
+  const modal = document.getElementById("addressEditModal");
+  const saveBtn = document.getElementById("addrEditSaveBtn");
+
+  function close() {
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  modal.addEventListener("click", (e) => {
+    if (e.target?.dataset?.close) close();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("open")) close();
+  });
+
+  saveBtn.addEventListener("click", () => {
+    const id = document.getElementById("addrEditId").value;
+
+    const title = document.getElementById("addrEditTitleInput").value.trim();
+    const tag = document.getElementById("addrEditTagInput").value.trim();
+    const line = document.getElementById("addrEditLineInput").value.trim();
+    const phone = document.getElementById("addrEditPhoneInput").value.trim();
+
+    if (!title || !line) {
+      const msg = document.getElementById("addrEditMsg");
+      if (msg) msg.textContent = "Title ve Address boş olamaz.";
+      return;
+    }
+
+    const list = readAddresses();
+    const idx = list.findIndex(a => a.id === id);
+    if (idx === -1) return;
+
+    list[idx] = {
+      ...list[idx],
+      title,
+      tag: tag || list[idx].tag || "Home",
+      line,
+      phone: phone || list[idx].phone || ""
+    };
+
+    writeAddresses(list);
+    renderAddresses();
+    close();
+  });
+
+  
+}
+
+function openAddressEditModal(addr) {
+  ensureAddressEditModal();
+
+  const modal = document.getElementById("addressEditModal");
+  const msg = document.getElementById("addrEditMsg");
+  if (msg) msg.textContent = "";
+
+  document.getElementById("addrEditId").value = addr.id;
+  document.getElementById("addrEditTitleInput").value = addr.title || "";
+  document.getElementById("addrEditTagInput").value = addr.tag || "";
+  document.getElementById("addrEditLineInput").value = addr.line || "";
+  document.getElementById("addrEditPhoneInput").value = addr.phone || "";
+
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+}
+
 function initStep3PaymentPage() {
   const back = document.getElementById("step3Back");
   const pay = document.getElementById("step3Pay");
@@ -1395,7 +1505,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error(e);
   }
 
-  productPageGrid
+  
   if (document.getElementById("addressList")) {
     seedAddressesIfEmpty();
     renderAddresses();
