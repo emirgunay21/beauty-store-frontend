@@ -1,10 +1,49 @@
+"use strict";
+
+/* =========================
+   1) Core Helpers
+========================= */
+const __CACHE = new Map();
 
 async function getJSON(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} -> ${url}`);
-  return res.json();
+  if (__CACHE.has(url)) return __CACHE.get(url);
+
+  const p = fetch(url).then(async (res) => {
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText} -> ${url}`);
+    return res.json();
+  });
+
+  __CACHE.set(url, p);
+  return p;
 }
 
+function buildStarsHTML(rating, size = 24) {
+  const r = Math.max(0, Math.min(5, Number(rating) || 0));
+  const full = Math.floor(r);
+  const half = (r - full) >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+
+  let html = "";
+  for (let i = 0; i < full; i++) {
+    html += `<img src="Star 1.png" style="width:${size}px;height:${size}px;" alt="star">`;
+  }
+  if (half) {
+    html += `<img src="Star 5.png" style="width:${size}px;height:${size}px;" alt="half">`;
+  }
+  for (let i = 0; i < empty; i++) {
+    html += `<img src="Starempty.png" style="width:${size}px;height:${size}px;" alt="empty">`;
+  }
+  return html;
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value ?? "-";
+}
+
+/* =========================
+   2) Storage (localStorage)
+========================= */
 function readCart() {
   try {
     const cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -25,12 +64,10 @@ function updateCartBadge() {
   const cart = readCart();
   const totalQty = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
 
-  
   if (badgeDesktop) {
     badgeDesktop.textContent = totalQty;
     badgeDesktop.style.display = totalQty > 0 ? "inline-block" : "none";
   }
-
 
   if (badgeMobile) {
     badgeMobile.textContent = totalQty;
@@ -38,13 +75,78 @@ function updateCartBadge() {
   }
 }
 
+function readComments(productId) {
+  try {
+    const all = JSON.parse(localStorage.getItem("commentsByProduct")) || {};
+    return Array.isArray(all[productId]) ? all[productId] : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeComments(productId, list) {
+  const all = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("commentsByProduct")) || {};
+    } catch {
+      return {};
+    }
+  })();
+
+  all[productId] = list;
+  localStorage.setItem("commentsByProduct", JSON.stringify(all));
+}
+
+const LS_KEY = "addresses";
+const LS_SELECTED = "selectedAddressId";
+
+function readAddresses() {
+  try {
+    const data = JSON.parse(localStorage.getItem(LS_KEY));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeAddresses(list) {
+  localStorage.setItem(LS_KEY, JSON.stringify(list));
+}
+
+function seedAddressesIfEmpty() {
+  const list = readAddresses();
+  if (list.length) return;
+
+  const seeded = [
+    {
+      id: "addr1",
+      title: "2118 Thornridge",
+      tag: "Home",
+      line: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
+      phone: "(209) 555-0104",
+    },
+    {
+      id: "addr2",
+      title: "11 Oxford Street",
+      tag: "Office",
+      line: "11 Oxford Street, London W1D 2LT",
+      phone: "(415) 555-0133",
+    },
+  ];
+
+  writeAddresses(seeded);
+  localStorage.setItem(LS_SELECTED, seeded[0].id);
+}
+
+/* =========================
+   3) Navbar / Menu / Login
+========================= */
 function setupBurgerMenu() {
   const burgerBtn = document.getElementById("burgerBtn");
   const mobileMenu = document.getElementById("mobileMenu");
   const overlay = document.getElementById("menuOverlay");
   const closeBtn = document.getElementById("menuCloseBtn");
 
-  
   if (!burgerBtn || !mobileMenu || !overlay || !closeBtn) return;
 
   function openMenu() {
@@ -79,24 +181,6 @@ function setupBurgerMenu() {
   });
 }
 
-function readComments(productId) {
-  try {
-    const all = JSON.parse(localStorage.getItem("commentsByProduct")) || {};
-    return Array.isArray(all[productId]) ? all[productId] : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeComments(productId, list) {
-  const all = (() => {
-    try { return JSON.parse(localStorage.getItem("commentsByProduct")) || {}; }
-    catch { return {}; }
-  })();
-
-  all[productId] = list;
-  localStorage.setItem("commentsByProduct", JSON.stringify(all));
-}
 function setupLoginModal() {
   const navUser = document.getElementById("navUser");
   const mobileUserBtn = document.getElementById("mobileUserBtn");
@@ -129,8 +213,11 @@ function setupLoginModal() {
   }
 
   function getUser() {
-    try { return JSON.parse(localStorage.getItem("user")); }
-    catch { return null; }
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
+    }
   }
 
   function renderUser() {
@@ -147,7 +234,6 @@ function setupLoginModal() {
     }
   }
 
- 
   navUser.addEventListener("click", () => {
     const user = getUser();
     if (!user) openModal();
@@ -159,32 +245,26 @@ function setupLoginModal() {
     }
   });
 
-  
   if (mobileUserBtn) {
-  mobileUserBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    mobileUserBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-    
-    if (mobileMenu && mobileMenu.classList.contains("open")) {
-      mobileMenu.classList.remove("open");
-      overlay?.classList.remove("show");  
-      burgerBtn?.setAttribute("aria-expanded", "false");
-      mobileMenu.setAttribute("aria-hidden", "true");
-      document.body.style.overflow = "";
-    }
+      if (mobileMenu && mobileMenu.classList.contains("open")) {
+        mobileMenu.classList.remove("open");
+        overlay?.classList.remove("show");
+        burgerBtn?.setAttribute("aria-expanded", "false");
+        mobileMenu.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+      }
 
-    
-    navUser.click();
-  });
-}
+      navUser.click();
+    });
+  }
 
+  if (navCart) navCart.addEventListener("click", () => (window.location.href = "ShoppingCardMobile.html"));
+  if (mobileCartBtn) mobileCartBtn.addEventListener("click", () => (window.location.href = "ShoppingCardMobile.html"));
 
-  if (navCart) navCart.addEventListener("click", () => window.location.href = "ShoppingCardMobile.html");
-  if (mobileCartBtn) mobileCartBtn.addEventListener("click", () => window.location.href = "ShoppingCardMobile.html");
-
- 
-  
   modal.addEventListener("click", (e) => {
     if (e.target?.dataset?.close) closeModal();
   });
@@ -211,8 +291,9 @@ function setupLoginModal() {
   renderUser();
 }
 
-
-
+/* =========================
+   4) Home / Catalog Rendering
+========================= */
 async function renderAll() {
   updateCartBadge();
 
@@ -224,10 +305,11 @@ async function renderAll() {
   const mainBanner = document.getElementById("mainBanner");
   const productPageGrid = document.getElementById("productPageGrid");
 
-  
   if (productsGrid) {
     const data = await getJSON("https://dummyjson.com/products?limit=8");
-    productsGrid.innerHTML = data.products.map(p => `
+    productsGrid.innerHTML = data.products
+      .map(
+        (p) => `
       <div class="productItems">
         <div class="productItemiphone14Pro">
           <img src="${p.thumbnail}" style="width:104px;height:104px;" alt="${p.title}">
@@ -243,13 +325,16 @@ async function renderAll() {
           </button>
         </div>
       </div>
-    `).join("");
+    `
+      )
+      .join("");
   }
 
-  
   if (discountGrid) {
     const data2 = await getJSON("https://dummyjson.com/products?limit=4&skip=8");
-    discountGrid.innerHTML = data2.products.map(p => `
+    discountGrid.innerHTML = data2.products
+      .map(
+        (p) => `
       <div class="DiscountitemTopiphoneGold">
         <img src="${p.thumbnail}" style="width:104px;height:104px;" alt="${p.title}">
         <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">
@@ -263,10 +348,11 @@ async function renderAll() {
           Buy Now
         </button>
       </div>
-    `).join("");
+    `
+      )
+      .join("");
   }
 
-  
   if (bannerBottomGrid) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=4");
     const p = data.products || [];
@@ -294,16 +380,14 @@ async function renderAll() {
         <h2 style="font-size:36px;margin:24px;color:black">${p[3]?.title || "Product"}</h2>
         <p style="font-size:19px;color:gray">${p[3]?.description || ""}</p>
         <button class="shopNowBtn" data-category="beauty"
-  style="width:343px;height:56px;border:2px solid black">
-  Shop Now
-</button>
+          style="width:343px;height:56px;border:2px solid black">
+          Shop Now
+        </button>
       </div>
     `;
   }
 
-  
   if (categoriesGrid) {
-    // ✅ click eventi sadece 1 kere ekle
     if (!categoriesGrid.dataset.bound) {
       categoriesGrid.addEventListener("click", (e) => {
         const card = e.target.closest(".category-card");
@@ -318,13 +402,10 @@ async function renderAll() {
     }
 
     const data3 = await getJSON("https://dummyjson.com/products/categories");
-    const normalize = (c) =>
-      (typeof c === "string")
-        ? { slug: c, name: c }
-        : { slug: c.slug || c.name || "", name: c.name || c.slug || "" };
+    const normalize = (c) => (typeof c === "string" ? { slug: c, name: c } : { slug: c.slug || c.name || "", name: c.name || c.slug || "" });
 
     const all = data3.map(normalize);
-    const wantedSlugs = ["beauty","fragrances","skin-care","sunglasses","womens-bags","womens-jewellery"];
+    const wantedSlugs = ["beauty", "fragrances", "skin-care", "sunglasses", "womens-bags", "womens-jewellery"];
 
     async function getCategoryIcon(slug) {
       try {
@@ -335,7 +416,7 @@ async function renderAll() {
       }
     }
 
-    const list = wantedSlugs.map(slug => all.find(c => c.slug === slug) || { slug, name: slug });
+    const list = wantedSlugs.map((slug) => all.find((c) => c.slug === slug) || { slug, name: slug });
     categoriesGrid.innerHTML = "";
 
     for (let i = 0; i < list.length; i += 2) {
@@ -352,18 +433,21 @@ async function renderAll() {
             <h1 style="font-size:16px;margin:0;color:black">${String(left.name).split("-").join(" ")}</h1>
           </div>
 
-          ${right ? `
+          ${
+            right
+              ? `
           <div class="CategoryItemTop category-card" data-cat="${right.slug}">
             <img src="${rightIcon}" style="width:48px;height:48px;" alt="${right.name}">
             <h1 style="font-size:16px;margin:0;color:black">${String(right.name).split("-").join(" ")}</h1>
           </div>
-          ` : ""}
+          `
+              : ""
+          }
         </div>
       `;
     }
   }
 
-  
   if (bigBannerWrapperGrid) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=4");
     const p = data.products || [];
@@ -376,59 +460,62 @@ async function renderAll() {
           <p style="font-size:49px;margin:0;color:black">${p[0].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[0].description}</p>
           <button class="shopNowBtn" data-category="beauty"
-  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
-  Shop Now
-</button>
+            style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+            Shop Now
+          </button>
         </div>
       </div>
+
       <div class="bigBanner bigBanner-desktop-only">
         <div class="Halfimage"><img src="${p[0].thumbnail}" style="width:360px; height:327px;" alt="${p[0].title}"></div>
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:black">${p[0].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[0].description}</p>
           <button class="shopNowBtn" data-category="beauty"
-  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
-  Shop Now
-</button>
+            style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+            Shop Now
+          </button>
         </div>
       </div>
+
       <div class="bigBanner bigBanner-desktop-only">
         <div class="Halfimage"><img src="${p[1].thumbnail}" style="width:360px; height:360px;" alt="${p[1].title}"></div>
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:black">${p[1].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[1].description}</p>
           <button class="shopNowBtn" data-category="beauty"
-  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
-  Shop Now
-</button>
+            style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+            Shop Now
+          </button>
         </div>
       </div>
+
       <div class="bigBanner bigBanner-desktop-only">
         <div class="Halfimage"><img src="${p[2].thumbnail}" style="width:360px; height:360px;" alt="${p[2].title}"></div>
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:black">${p[2].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[2].description}</p>
           <button class="shopNowBtn" data-category="beauty"
-  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
-  Shop Now
-</button>
+            style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+            Shop Now
+          </button>
         </div>
       </div>
+
       <div class="bigBanner bigBanner-desktop-only bigBanner-dark">
         <div class="Halfimage"><img src="${p[3].thumbnail}" style="width:340px; height:356px;" alt="${p[3].title}"></div>
         <div class="bigBannerText">
           <p style="font-size:49px;margin:0;color:white">${p[3].title}</p>
           <p style="font-size:14px;color:gray;margin-left:32px;margin-right:32px;">${p[3].description}</p>
           <button class="shopNowBtn" data-category="beauty"
-  style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
-  Shop Now
-</button>
+            style="width:184px;height:56px;background:white;border:2px solid black;color:black;border-radius:8px;">
+            Shop Now
+          </button>
         </div>
       </div>
     `;
   }
 
- 
   if (mainBanner) {
     const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=1");
     const p = data.products?.[0];
@@ -440,9 +527,9 @@ async function renderAll() {
         <h2 style="font-size:72px;margin:0;color:#FFFFFF">${p?.title || "Beauty Essentials"}</h2>
         <p style="font-size:19px;color:gray;margin:0;">${p?.description || ""}</p>
         <button class="shopNowBtn" data-category="beauty"
-  style="width:184px;height:56px;background-color:#211C24;border:2px solid white;color:white;margin-top:48px;border-radius:8px;">
-  Shop Now
-</button>
+          style="width:184px;height:56px;background-color:#211C24;border:2px solid white;color:white;margin-top:48px;border-radius:8px;">
+          Shop Now
+        </button>
       </div>
 
       <div class="bannerTopimage">
@@ -454,7 +541,6 @@ async function renderAll() {
     `;
   }
 
-  
   if (productPageGrid) {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -462,12 +548,14 @@ async function renderAll() {
 
       const data = await getJSON(`https://dummyjson.com/products/category/${encodeURIComponent(category)}?limit=12`);
       const products = data.products || [];
-       buildBrandFilters(products);
-       PRODUCTPAGE_ALL = products;
-PRODUCTPAGE_VIEW = products;
 
-buildBrandListDesktop(PRODUCTPAGE_ALL);
-setupBrandSearchDesktop();
+      buildBrandFilters(products);
+      PRODUCTPAGE_ALL = products;
+      PRODUCTPAGE_VIEW = products;
+
+      buildBrandListDesktop(PRODUCTPAGE_ALL);
+      setupBrandSearchDesktop();
+
       let html = "";
       for (let i = 0; i < products.length; i += 2) {
         const left = products[i];
@@ -485,7 +573,9 @@ setupBrandSearchDesktop();
               </button>
             </div>
 
-            ${right ? `
+            ${
+              right
+                ? `
             <div class="productResultItemIphone">
               <img src="${right.thumbnail}" style="width:104px;height:104px;" alt="${right.title}">
               <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${right.title}</h2>
@@ -495,7 +585,9 @@ setupBrandSearchDesktop();
                 Buy Now
               </button>
             </div>
-            ` : ""}
+            `
+                : ""
+            }
           </div>
         `;
       }
@@ -507,6 +599,9 @@ setupBrandSearchDesktop();
   }
 }
 
+/* =========================
+   5) Product Page (Filters)
+========================= */
 const filtersBtn = document.getElementById("filtersBtn");
 const ratingBtn = document.getElementById("ratingBtn");
 const filtersDrop = document.getElementById("filtersDrop");
@@ -521,15 +616,14 @@ ratingBtn?.addEventListener("click", () => {
   toggleDrop();
   ratingChevron?.classList.toggle("rotate");
 });
+
 function buildBrandFilters(products) {
   const box = document.getElementById("brandFilters");
   if (!box) return;
 
-  const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
+  const brands = [...new Set(products.map((p) => p.brand).filter(Boolean))].sort();
 
-  box.innerHTML = brands
-    .map(b => `<label><input type="checkbox" value="${b}"> ${b}</label>`)
-    .join("");
+  box.innerHTML = brands.map((b) => `<label><input type="checkbox" value="${b}"> ${b}</label>`).join("");
 }
 let PRODUCTPAGE_ALL = [];
 let PRODUCTPAGE_VIEW = [];
@@ -538,16 +632,17 @@ function buildBrandListDesktop(products) {
   const ul = document.getElementById("brandListDesktop");
   if (!ul) return;
 
-  // brand -> count
   const counts = new Map();
-  products.forEach(p => {
+  products.forEach((p) => {
     if (!p.brand) return;
     counts.set(p.brand, (counts.get(p.brand) || 0) + 1);
   });
 
   const brands = [...counts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
 
-  ul.innerHTML = brands.map(([brand, count]) => `
+  ul.innerHTML = brands
+    .map(
+      ([brand, count]) => `
     <li>
       <label class="brandItem">
         <input type="checkbox" class="brandCheckDesktop" value="${brand}">
@@ -556,10 +651,11 @@ function buildBrandListDesktop(products) {
         <span class="brandCount">${count}</span>
       </label>
     </li>
-  `).join("");
+  `
+    )
+    .join("");
 
-  
-  ul.querySelectorAll(".brandCheckDesktop").forEach(chk => {
+  ul.querySelectorAll(".brandCheckDesktop").forEach((chk) => {
     chk.addEventListener("change", applyDesktopBrandFilter);
   });
 }
@@ -571,33 +667,31 @@ function setupBrandSearchDesktop() {
 
   input.addEventListener("input", () => {
     const q = input.value.trim().toLowerCase();
-    ul.querySelectorAll("li").forEach(li => {
+    ul.querySelectorAll("li").forEach((li) => {
       const name = li.querySelector(".brandName")?.textContent?.toLowerCase() || "";
       li.style.display = name.includes(q) ? "" : "none";
     });
   });
 }
 
-
 function applyDesktopBrandFilter() {
-  const selected = [...document.querySelectorAll(".brandCheckDesktop:checked")].map(x => x.value);
+  const selected = [...document.querySelectorAll(".brandCheckDesktop:checked")].map((x) => x.value);
 
   let filtered = [...PRODUCTPAGE_ALL];
   if (selected.length) {
-    filtered = filtered.filter(p => selected.includes(p.brand));
+    filtered = filtered.filter((p) => selected.includes(p.brand));
   }
 
   PRODUCTPAGE_VIEW = filtered;
 
-
   renderProductPageGridDesktop(PRODUCTPAGE_VIEW);
 }
 
-
+/* =========================
+   6) Global Click Handlers
+========================= */
 function setupClicks() {
   document.body.addEventListener("click", (e) => {
-
-    
     const goDetailBtn = e.target.closest("button[data-go-detail='1']");
     if (goDetailBtn) {
       const id = Number(goDetailBtn.dataset.productId);
@@ -606,14 +700,13 @@ function setupClicks() {
       return;
     }
 
-    
     const addCartBtn = e.target.closest("button[data-add-cart='1']");
     if (addCartBtn) {
       const id = Number(addCartBtn.dataset.productId);
       if (!Number.isFinite(id)) return;
 
       const cart = readCart();
-      const existing = cart.find(i => Number(i.id) === id);
+      const existing = cart.find((i) => Number(i.id) === id);
 
       if (existing) existing.qty = (existing.qty || 0) + 1;
       else cart.push({ id, qty: 1 });
@@ -622,26 +715,108 @@ function setupClicks() {
       updateCartBadge();
       return;
     }
-
   });
 }
-function buildStarsHTML(rating, size = 24) {
-  const r = Math.max(0, Math.min(5, Number(rating) || 0));
-  const full = Math.floor(r);
-  const half = (r - full) >= 0.5 ? 1 : 0;
-  const empty = 5 - full - half;
 
-  let html = "";
-  for (let i = 0; i < full; i++) {
-    html += `<img src="Star 1.png" style="width:${size}px;height:${size}px;" alt="star">`;
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest(".shopNowBtn");
+  if (!btn) return;
+
+  const category = btn.dataset.category || "beauty";
+  window.location.href = `ProductPage.html?category=${encodeURIComponent(category)}`;
+});
+
+/* =========================
+   7) Product Details
+========================= */
+function renderDetailsSection(p) {
+  setText("pdDetailsText", p.description || "");
+
+  setText("pdSpec1", p.brand || "-");
+  setText("pdSpec2", p.category || "-");
+  setText("pdSpec3", (p.rating ?? "-").toString());
+  setText("pdSpec4", Number(p.stock || 0) > 0 ? `${p.stock} pcs` : "Out of stock");
+  setText("pdSpec5", `$${p.price}`);
+
+  const extra = document.getElementById("pdExtraList");
+  if (extra) {
+    const tags = Array.isArray(p.tags) ? p.tags : [];
+    extra.innerHTML = tags.length
+      ? tags.map((t) => `<p style="font-size: 15px;color: black;font-weight: bold;margin: 0px;">${String(t)}</p>`).join("")
+      : `<p style="font-size: 15px;color: black;font-weight: bold;margin: 0px;">-</p>`;
   }
-  if (half) {
-    html += `<img src="Star 5.png" style="width:${size}px;height:${size}px;" alt="half">`;
+
+  setText("pdCpu1", p.warrantyInformation || "-");
+  setText("pdCpu2", p.shippingInformation || "-");
+}
+
+function setupCommentsToggle() {
+  const root = document.getElementById("commentsRoot");
+  const btn = document.getElementById("commentsToggleBtn");
+  if (!root || !btn) return;
+
+  btn.addEventListener("click", () => {
+    const opened = root.classList.toggle("expanded");
+    btn.textContent = opened ? "View less" : "View more";
+  });
+}
+
+async function renderRelatedProducts(p) {
+  const grid = document.getElementById("relatedProductsGrid");
+  if (!grid) return;
+
+  try {
+    const cat = encodeURIComponent(p.category || "");
+    if (!cat) {
+      grid.innerHTML = "";
+      return;
+    }
+
+    const data = await getJSON(`https://dummyjson.com/products/category/${cat}?limit=12`);
+    let list = (data.products || []).filter((x) => Number(x.id) !== Number(p.id));
+    list = list.slice(0, 4);
+
+    let html = "";
+    for (let i = 0; i < list.length; i += 2) {
+      const left = list[i];
+      const right = list[i + 1];
+
+      html += `
+        <div class="ProductResultItems">
+          <div class="productResultItemIphone">
+            <img src="${left.thumbnail}" style="width:104px;height:104px;" alt="${left.title}">
+            <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${left.title}</h2>
+            <p style="font-size:24px;color:black;margin:0;">$${left.price}</p>
+            <button data-go-detail="1" data-product-id="${left.id}"
+              style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
+              Buy Now
+            </button>
+          </div>
+
+          ${
+            right
+              ? `
+          <div class="productResultItemIphone">
+            <img src="${right.thumbnail}" style="width:104px;height:104px;" alt="${right.title}">
+            <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${right.title}</h2>
+            <p style="font-size:24px;color:black;margin:0;">$${right.price}</p>
+            <button data-go-detail="1" data-product-id="${right.id}"
+              style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
+              Buy Now
+            </button>
+          </div>
+          `
+              : ""
+          }
+        </div>
+      `;
+    }
+
+    grid.innerHTML = html;
+  } catch (e) {
+    console.error("Related products error:", e);
+    grid.innerHTML = "";
   }
-  for (let i = 0; i < empty; i++) {
-    html += `<img src="Starempty.png" style="width:${size}px;height:${size}px;" alt="empty">`;
-  }
-  return html;
 }
 
 async function renderProductDetails() {
@@ -659,7 +834,6 @@ async function renderProductDetails() {
     const p = await getJSON(`https://dummyjson.com/products/${encodeURIComponent(id)}`);
     await renderRelatedProducts(p);
 
-    
     const thumbs = (p.images || []).slice(0, 4);
 
     const catLower = String(p.category || "").toLowerCase();
@@ -677,7 +851,7 @@ async function renderProductDetails() {
         <div class="productPageFiltersMobileTop">
           <img src="${p.thumbnail}" style="width:263.59px;height:329.24px;" alt="${p.title}">
           <div class="imageFilters">
-            ${thumbs.map(src => `<img src="${src}" style="width:74px;height:66px;" alt="thumb">`).join("")}
+            ${thumbs.map((src) => `<img src="${src}" style="width:74px;height:66px;" alt="thumb">`).join("")}
           </div>
         </div>
 
@@ -687,10 +861,14 @@ async function renderProductDetails() {
 
             <div class="productPageDetailsMobileText2">
               <p style="font-size:32px;margin:0;">$${p.price}</p>
-              ${p.discountPercentage ? `
+              ${
+                p.discountPercentage
+                  ? `
                 <p style="font-size:24px;color:gray;text-decoration:line-through;margin-left:16px;margin-top:6px;">
-                  $${Math.round(p.price / (1 - (p.discountPercentage/100)))}
-                </p>` : ``}
+                  $${Math.round(p.price / (1 - p.discountPercentage / 100))}
+                </p>`
+                  : ``
+              }
             </div>
           </div>
 
@@ -709,31 +887,37 @@ async function renderProductDetails() {
             </div>
             <div class="metaItem">
               <p class="metaLabel">Stock</p>
-              <p class="metaValue">${Number(p.stock||0) > 0 ? `${p.stock} pcs` : "Out of stock"}</p>
+              <p class="metaValue">${Number(p.stock || 0) > 0 ? `${p.stock} pcs` : "Out of stock"}</p>
             </div>
           </div>
 
-          ${isBeauty ? `
+          ${
+            isBeauty
+              ? `
           <div class="variantBlock">
             <p class="metaLabel" style="margin-bottom:10px;">Shade</p>
             <div class="pillRow" id="shadeRow">
-              ${shadeOptions.map(s => `
+              ${shadeOptions
+                .map(
+                  (s) => `
                 <button type="button" class="pillBtn" data-shade="${s.key}">
                   ${s.key} <span style="opacity:.7;margin-left:6px;">${s.name}</span>
                 </button>
-              `).join("")}
+              `
+                )
+                .join("")}
             </div>
           </div>
 
           <div class="variantBlock">
             <p class="metaLabel" style="margin-bottom:10px;">Size</p>
             <div class="pillRow" id="sizeRow">
-              ${sizeOptions.map(sz => `
-                <button type="button" class="pillBtn" data-size="${sz}">${sz}</button>
-              `).join("")}
+              ${sizeOptions.map((sz) => `<button type="button" class="pillBtn" data-size="${sz}">${sz}</button>`).join("")}
             </div>
           </div>
-          ` : ""}
+          `
+              : ""
+          }
 
           <p style="font-size:15px;color:#6C6C6C;margin-top:18px;">${p.description || ""}</p>
 
@@ -751,10 +935,8 @@ async function renderProductDetails() {
       </div>
     `;
 
-    
     renderDetailsSection(p);
 
-  
     const bc = document.getElementById("breadcrumbs");
     if (bc) {
       const catText = (p.category || "").toString().split("-").join(" ");
@@ -783,7 +965,6 @@ async function renderProductDetails() {
       });
     }
 
-   
     const reviewsBox = document.querySelector(".productPageFiltersMobileRewiews");
     const ratingNumberEl = reviewsBox?.querySelector(".productPageFiltersMobileRewiewsRating1 h1");
     if (ratingNumberEl) ratingNumberEl.textContent = (p.rating ?? "-").toString();
@@ -791,23 +972,21 @@ async function renderProductDetails() {
     const ratingStarsEl = reviewsBox?.querySelector(".productPageFiltersMobileRewiewsRatingStars");
     if (ratingStarsEl) ratingStarsEl.innerHTML = buildStarsHTML(p.rating, 24);
 
-  
     const commentsRoot = document.getElementById("commentsRoot");
     const input = document.getElementById("commentInput");
     const starsSel = document.getElementById("commentStars");
     const sendBtn = document.getElementById("commentSubmit");
 
-    
     const beautyComments = [
       { name: "Grace Carey", stars: 4.5, text: "Texture is smooth and lightweight. Blends easily and looks natural all day. Great for daily makeup.", pics: [], avatar: "gracepic.png" },
       { name: "Ronald Richards", stars: 5, text: "Nice packaging and the scent is pleasant (not too strong). Good value for the price.", pics: [], avatar: "ronaldpic.png" },
-      { name: "Darcy King", stars: 4, text: "Color payoff is good, but I’d recommend moisturizing first. Overall I’m happy with it.", pics: [], avatar: "darcypic.png" }
+      { name: "Darcy King", stars: 4, text: "Color payoff is good, but I’d recommend moisturizing first. Overall I’m happy with it.", pics: [], avatar: "darcypic.png" },
     ];
 
     const phoneComments = [
       { name: "Grace Carey", stars: 4.5, text: "Fast delivery and the device looks great. Performance is solid and battery lasts long.", pics: [], avatar: "gracepic.png" },
       { name: "Ronald Richards", stars: 5, text: "Storage is great and the build feels premium. Highly recommended.", pics: [], avatar: "ronaldpic.png" },
-      { name: "Darcy King", stars: 4, text: "Camera quality is good, but low-light could be better. Still a nice purchase.", pics: [], avatar: "darcypic.png" }
+      { name: "Darcy King", stars: 4, text: "Camera quality is good, but low-light could be better. Still a nice purchase.", pics: [], avatar: "darcypic.png" },
     ];
 
     const seedList = isBeauty ? beautyComments : phoneComments;
@@ -823,15 +1002,12 @@ async function renderProductDetails() {
     function renderComments(listToRender) {
       if (!commentsRoot) return;
 
-      commentsRoot.innerHTML = listToRender.map((c, idx) => {
-        const cls =
-          idx === 0 ? "reviewAndCommentsGrace" :
-          idx === 1 ? "reviewAndCommentsRonald" :
-          "reviewAndCommentsDarcy";
+      commentsRoot.innerHTML = listToRender
+        .map((c, idx) => {
+          const cls = idx === 0 ? "reviewAndCommentsGrace" : idx === 1 ? "reviewAndCommentsRonald" : "reviewAndCommentsDarcy";
+          const avatarSrc = c.avatar || pickFallbackAvatar(c.name);
 
-        const avatarSrc = c.avatar || pickFallbackAvatar(c.name);
-
-        return `
+          return `
           <div class="${cls}">
             <img src="${avatarSrc}" style="width:48px;height:48px;margin-left:16px;margin-top:24px;" alt="User">
 
@@ -848,16 +1024,16 @@ async function renderProductDetails() {
             </div>
           </div>
         `;
-      }).join("");
+        })
+        .join("");
     }
 
     if (commentsRoot) {
-      const stored = readComments(String(p.id)); 
-      const merged = [...stored, ...seedList];   
+      const stored = readComments(String(p.id));
+      const merged = [...stored, ...seedList];
       renderComments(merged);
     }
 
-    
     if (sendBtn && !sendBtn.dataset.bound) {
       sendBtn.dataset.bound = "1";
 
@@ -871,8 +1047,11 @@ async function renderProductDetails() {
         }
 
         const user = (() => {
-          try { return JSON.parse(localStorage.getItem("user")); }
-          catch { return null; }
+          try {
+            return JSON.parse(localStorage.getItem("user"));
+          } catch {
+            return null;
+          }
         })();
 
         if (!user?.email) {
@@ -887,7 +1066,7 @@ async function renderProductDetails() {
           stars,
           text,
           pics: [],
-          avatar: "User.png"
+          avatar: "User.png",
         });
 
         writeComments(String(p.id), storedNow);
@@ -899,19 +1078,17 @@ async function renderProductDetails() {
       });
     }
 
-    
     setupCommentsToggle();
 
-  
     let selectedShade = null;
     let selectedSize = null;
 
     function bindPills(rowId, attr, onSelect) {
       const row = document.getElementById(rowId);
       if (!row) return;
-      row.querySelectorAll(".pillBtn").forEach(btn => {
+      row.querySelectorAll(".pillBtn").forEach((btn) => {
         btn.addEventListener("click", () => {
-          row.querySelectorAll(".pillBtn").forEach(x => x.classList.remove("active"));
+          row.querySelectorAll(".pillBtn").forEach((x) => x.classList.remove("active"));
           btn.classList.add("active");
           onSelect(btn.dataset[attr]);
         });
@@ -919,8 +1096,8 @@ async function renderProductDetails() {
     }
 
     if (isBeauty) {
-      bindPills("shadeRow", "shade", (v) => selectedShade = v);
-      bindPills("sizeRow", "size", (v) => selectedSize = v);
+      bindPills("shadeRow", "shade", (v) => (selectedShade = v));
+      bindPills("sizeRow", "size", (v) => (selectedSize = v));
 
       const firstShade = document.querySelector("#shadeRow .pillBtn");
       if (firstShade) firstShade.click();
@@ -937,68 +1114,64 @@ async function renderProductDetails() {
 
       const cart = readCart();
       const key = `${p.id}|${selectedShade || ""}|${selectedSize || ""}`;
-      const existing = cart.find(i => i.key === key);
+      const existing = cart.find((i) => i.key === key);
 
       if (existing) existing.qty = (existing.qty || 0) + 1;
-      else cart.push({
-        key,
-        id: p.id,
-        qty: 1,
-        shade: selectedShade,
-        size: selectedSize
-      });
+      else
+        cart.push({
+          key,
+          id: p.id,
+          qty: 1,
+          shade: selectedShade,
+          size: selectedSize,
+        });
 
       writeCart(cart);
       updateCartBadge();
     });
-
   } catch (err) {
     console.error(err);
     root.innerHTML = "<p style='padding:16px;'>Ürün yüklenemedi.</p>";
   }
 }
-// ---------- Shopping Cart render ----------
+
+/* =========================
+   8) Cart
+========================= */
 async function renderCartPage() {
   const listEl = document.getElementById("cartList");
-  if (!listEl) return; 
+  if (!listEl) return;
 
-  const cart = readCart(); 
+  const cart = readCart();
   if (!cart.length) {
     listEl.innerHTML = `<p style="padding:12px;color:#6C6C6C;">Sepet boş</p>`;
-      listEl.classList.remove("is-scroll"); 
+    listEl.classList.remove("is-scroll");
     updateSummary(0);
     return;
   }
 
-  
-  const ids = [...new Set(cart.map(i => Number(i.id)).filter(Boolean))];
-  const products = await Promise.all(
-    ids.map(id => getJSON(`https://dummyjson.com/products/${id}`).catch(() => null))
-  );
-  const byId = new Map(products.filter(Boolean).map(p => [Number(p.id), p]));
+  const ids = [...new Set(cart.map((i) => Number(i.id)).filter(Boolean))];
+  const products = await Promise.all(ids.map((id) => getJSON(`https://dummyjson.com/products/${id}`).catch(() => null)));
+  const byId = new Map(products.filter(Boolean).map((p) => [Number(p.id), p]));
 
-  // satırları oluştur
   let subtotal = 0;
 
-  listEl.innerHTML = cart.map(item => {
-    const p = byId.get(Number(item.id));
-    const title = p?.title || "Product";
-    const thumb = p?.thumbnail || "placeholder.png";
-    const price = Number(p?.price || 0);
-    const qty = Number(item.qty || 0);
+  listEl.innerHTML = cart
+    .map((item) => {
+      const p = byId.get(Number(item.id));
+      const title = p?.title || "Product";
+      const thumb = p?.thumbnail || "placeholder.png";
+      const price = Number(p?.price || 0);
+      const qty = Number(item.qty || 0);
 
-    const lineTotal = price * qty;
-    subtotal += lineTotal;
+      const lineTotal = price * qty;
+      subtotal += lineTotal;
 
-   
-    const variantText = [
-      item.shade ? `Shade: ${item.shade}` : "",
-      item.size ? `Size: ${item.size}` : ""
-    ].filter(Boolean).join(" • ");
+      const variantText = [item.shade ? `Shade: ${item.shade}` : "", item.size ? `Size: ${item.size}` : ""].filter(Boolean).join(" • ");
 
-    const rowKey = item.key || String(item.id);
+      const rowKey = item.key || String(item.id);
 
-    return `
+      return `
       <div class="shopingCardProduct" data-row-key="${rowKey}">
         <img src="${thumb}" alt="${title}" style="width: 90px;height:90px;object-fit:cover;">
         <div class="shopingCardProductDetails">
@@ -1018,45 +1191,50 @@ async function renderCartPage() {
         </div>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 
   updateSummary(subtotal);
-const itemsCount = listEl.children.length;
-listEl.classList.toggle("is-scroll", itemsCount >= 3);
-  // tek event: + / - / sil
-  listEl.addEventListener("click", (e) => {
-    const row = e.target.closest(".shopingCardProduct");
-    if (!row) return;
 
-    const key = row.dataset.rowKey;
-    if (!key) return;
+  const itemsCount = listEl.children.length;
+  listEl.classList.toggle("is-scroll", itemsCount >= 3);
 
-    let cartNow = readCart();
+  listEl.addEventListener(
+    "click",
+    (e) => {
+      const row = e.target.closest(".shopingCardProduct");
+      if (!row) return;
 
-    const idx = cartNow.findIndex(x => (x.key || String(x.id)) === key);
-    if (idx === -1) return;
+      const key = row.dataset.rowKey;
+      if (!key) return;
 
-    if (e.target.closest("[data-inc='1']")) {
-      cartNow[idx].qty = (Number(cartNow[idx].qty) || 0) + 1;
-    }
+      let cartNow = readCart();
 
-    if (e.target.closest("[data-dec='1']")) {
-      cartNow[idx].qty = (Number(cartNow[idx].qty) || 0) - 1;
-      if (cartNow[idx].qty <= 0) cartNow.splice(idx, 1);
-    }
+      const idx = cartNow.findIndex((x) => (x.key || String(x.id)) === key);
+      if (idx === -1) return;
 
-    if (e.target.closest("[data-remove='1']")) {
-      cartNow.splice(idx, 1);
-    }
+      if (e.target.closest("[data-inc='1']")) {
+        cartNow[idx].qty = (Number(cartNow[idx].qty) || 0) + 1;
+      }
 
-    writeCart(cartNow);
-    updateCartBadge();
-    renderCartPage(); 
-  }, { once: true }); 
+      if (e.target.closest("[data-dec='1']")) {
+        cartNow[idx].qty = (Number(cartNow[idx].qty) || 0) - 1;
+        if (cartNow[idx].qty <= 0) cartNow.splice(idx, 1);
+      }
+
+      if (e.target.closest("[data-remove='1']")) {
+        cartNow.splice(idx, 1);
+      }
+
+      writeCart(cartNow);
+      updateCartBadge();
+      renderCartPage();
+    },
+    { once: true }
+  );
 }
 
 function updateSummary(subtotal) {
-  
   const tax = subtotal > 0 ? subtotal * 0.02 : 0;
   const ship = subtotal > 0 ? 29 : 0;
   const total = subtotal + tax + ship;
@@ -1081,115 +1259,18 @@ function setupCheckoutBtn() {
   });
 }
 
-async function renderRelatedProducts(p) {
-  const grid = document.getElementById("relatedProductsGrid");
-  if (!grid) return;
-
-  try {
-    const cat = encodeURIComponent(p.category || "");
-    if (!cat) {
-      grid.innerHTML = "";
-      return;
-    }
-
-    const data = await getJSON(`https://dummyjson.com/products/category/${cat}?limit=12`);
-    let list = (data.products || []).filter(x => Number(x.id) !== Number(p.id));
-
-    
-    list = list.slice(0, 4);
-
-    
-    let html = "";
-    for (let i = 0; i < list.length; i += 2) {
-      const left = list[i];
-      const right = list[i + 1];
-
-      html += `
-        <div class="ProductResultItems">
-          <div class="productResultItemIphone">
-            <img src="${left.thumbnail}" style="width:104px;height:104px;" alt="${left.title}">
-            <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${left.title}</h2>
-            <p style="font-size:24px;color:black;margin:0;">$${left.price}</p>
-            <button data-go-detail="1" data-product-id="${left.id}"
-              style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
-              Buy Now
-            </button>
-          </div>
-
-          ${right ? `
-          <div class="productResultItemIphone">
-            <img src="${right.thumbnail}" style="width:104px;height:104px;" alt="${right.title}">
-            <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">${right.title}</h2>
-            <p style="font-size:24px;color:black;margin:0;">$${right.price}</p>
-            <button data-go-detail="1" data-product-id="${right.id}"
-              style="width:139px;height:48px;background-color:#211C24;border:none;color:white;margin-top:16px;border-radius:8px;">
-              Buy Now
-            </button>
-          </div>
-          ` : ""}
-        </div>
-      `;
-    }
-
-    grid.innerHTML = html;
-  } catch (e) {
-    console.error("Related products error:", e);
-    grid.innerHTML = "";
-  }
-}
-const LS_KEY = "addresses";
-const LS_SELECTED = "selectedAddressId";
-
-function readAddresses() {
-  try {
-    const data = JSON.parse(localStorage.getItem(LS_KEY));
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeAddresses(list) {
-  localStorage.setItem(LS_KEY, JSON.stringify(list));
-}
-
-function seedAddressesIfEmpty() {
-  const list = readAddresses();
-  if (list.length) return;
-
-  const seeded = [
-    {
-      id: "addr1",
-      title: "2118 Thornridge",
-      tag: "Home",
-      line: "2118 Thornridge Cir. Syracuse, Connecticut 35624",
-      phone: "(209) 555-0104"
-    },
-    {
-      id: "addr2",
-      title: "11 Oxford Street",
-      tag: "Office",
-      line: "11 Oxford Street, London W1D 2LT",
-      phone: "(415) 555-0133"
-    }
-  ];
-
-  writeAddresses(seeded);
-  localStorage.setItem(LS_SELECTED, seeded[0].id);
-}
-
+/* =========================
+   9) Checkout
+========================= */
 function renderAddresses() {
   const listEl = document.getElementById("addressList");
   if (!listEl) return;
 
   const addresses = readAddresses();
-  const selectedId =
-    localStorage.getItem(LS_SELECTED) ||
-    (addresses[0] && addresses[0].id);
+  const selectedId = localStorage.getItem(LS_SELECTED) || (addresses[0] && addresses[0].id);
 
   if (!addresses.length) {
-    listEl.innerHTML =
-      `<p style="margin:12px 0;color:#6C6C6C;">No saved address.</p>`;
+    listEl.innerHTML = `<p style="margin:12px 0;color:#6C6C6C;">No saved address.</p>`;
     return;
   }
 
@@ -1222,11 +1303,31 @@ function renderAddresses() {
 
 function initStep1AddressPage() {
   const listEl = document.getElementById("addressList");
-  if (!listEl) return; 
+  if (!listEl) return;
 
   seedAddressesIfEmpty();
   renderAddresses();
 }
+
+function bindStep1Nav() {
+  const back = document.getElementById("step1Back");
+  const next = document.getElementById("step1Next");
+  if (!back || !next) return;
+
+  back.addEventListener("click", () => {
+    window.location.href = "ShoppingCardMobile.html";
+  });
+
+  next.addEventListener("click", () => {
+    const selectedId = localStorage.getItem("selectedAddressId");
+    if (!selectedId) {
+      alert("Lütfen bir adres seç.");
+      return;
+    }
+    window.location.href = "Step2.html";
+  });
+}
+
 function bindAddressActionsOnce() {
   const host = document.getElementById("addressList");
   if (!host || host.dataset.bound === "1") return;
@@ -1239,9 +1340,8 @@ function bindAddressActionsOnce() {
     const id = card.dataset.id;
     if (!id) return;
 
-   
     if (e.target.classList.contains("addrDelete")) {
-      let list = readAddresses().filter(a => a.id !== id);
+      let list = readAddresses().filter((a) => a.id !== id);
       writeAddresses(list);
 
       const selected = localStorage.getItem(LS_SELECTED);
@@ -1253,88 +1353,34 @@ function bindAddressActionsOnce() {
       return;
     }
 
-    
     if (e.target.classList.contains("addrEdit")) {
-  // ✅ giriş kontrolü
-  let user = null;
-  try { user = JSON.parse(localStorage.getItem("user")); } catch {}
-  if (!user?.email) {
-    alert("Düzenlemek için giriş yapmalısın.");
-    document.getElementById("navUser")?.click(); // login modalı aç
-    return;
-  }
+      let user = null;
+      try {
+        user = JSON.parse(localStorage.getItem("user"));
+      } catch {}
+      if (!user?.email) {
+        alert("Düzenlemek için giriş yapmalısın.");
+        document.getElementById("navUser")?.click();
+        return;
+      }
 
-  // ✅ popup aç
-  const list = readAddresses();
-  const addr = list.find(a => a.id === id);
-  if (!addr) return;
+      const list = readAddresses();
+      const addr = list.find((a) => a.id === id);
+      if (!addr) return;
 
-  openAddressEditModal(addr);
-  return;
-}
-  });
-}
-function bindStep1Nav() {
-  const back = document.getElementById("step1Back");
-  const next = document.getElementById("step1Next");
-  if (!back || !next) return;
-
-  back.addEventListener("click", () => {
-    
-    window.location.href = "ShoppingCardMobile.html";
-  });
-
-  next.addEventListener("click", () => {
-    
-    const selectedId = localStorage.getItem("selectedAddressId");
-    if (!selectedId) {
-      alert("Lütfen bir adres seç.");
+      openAddressEditModal(addr);
       return;
     }
-   
-    window.location.href = "Step2.html";
   });
 }
-function initStep2ShippingPage() {
-  const back = document.getElementById("step2Back");
-  const next = document.getElementById("step2Next");
-  if (!back || !next) return; 
 
-  
-  const saved = localStorage.getItem("selectedShippingId");
-  if (saved) {
-    const input = document.querySelector(`input[name="shipment"][value="${saved}"]`);
-    if (input) input.checked = true;
-  }
-
-
-  document.querySelectorAll(`input[name="shipment"]`).forEach((r) => {
-    r.addEventListener("change", () => {
-      localStorage.setItem("selectedShippingId", r.value);
-    });
-  });
-
- 
-  back.addEventListener("click", () => {
-    window.location.href = "step1.html";
-  });
-
-
-  next.addEventListener("click", () => {
-    const picked = document.querySelector(`input[name="shipment"]:checked`);
-    if (!picked) {
-      alert("Lütfen bir shipment method seç.");
-      return;
-    }
-    localStorage.setItem("selectedShippingId", picked.value);
-    window.location.href = "Step3.html";
-  });
-}
-// ---------- Address Edit Modal ----------
+/* ---------- Address Edit Modal ---------- */
 function ensureAddressEditModal() {
   if (document.getElementById("addressEditModal")) return;
 
-  document.body.insertAdjacentHTML("beforeend", `
+  document.body.insertAdjacentHTML(
+    "beforeend",
+    `
     <div class="modal" id="addressEditModal" aria-hidden="true">
       <div class="modal-backdrop" data-close="1"></div>
 
@@ -1364,7 +1410,8 @@ function ensureAddressEditModal() {
         </div>
       </div>
     </div>
-  `);
+  `
+  );
 
   const modal = document.getElementById("addressEditModal");
   const saveBtn = document.getElementById("addrEditSaveBtn");
@@ -1397,7 +1444,7 @@ function ensureAddressEditModal() {
     }
 
     const list = readAddresses();
-    const idx = list.findIndex(a => a.id === id);
+    const idx = list.findIndex((a) => a.id === id);
     if (idx === -1) return;
 
     list[idx] = {
@@ -1405,15 +1452,13 @@ function ensureAddressEditModal() {
       title,
       tag: tag || list[idx].tag || "Home",
       line,
-      phone: phone || list[idx].phone || ""
+      phone: phone || list[idx].phone || "",
     };
 
     writeAddresses(list);
     renderAddresses();
     close();
   });
-
-  
 }
 
 function openAddressEditModal(addr) {
@@ -1433,87 +1478,131 @@ function openAddressEditModal(addr) {
   modal.setAttribute("aria-hidden", "false");
 }
 
+function initStep2ShippingPage() {
+  const back = document.getElementById("step2Back");
+  const next = document.getElementById("step2Next");
+  if (!back || !next) return;
+
+  const saved = localStorage.getItem("selectedShippingId");
+  if (saved) {
+    const input = document.querySelector(`input[name="shipment"][value="${saved}"]`);
+    if (input) input.checked = true;
+  }
+
+  document.querySelectorAll(`input[name="shipment"]`).forEach((r) => {
+    r.addEventListener("change", () => {
+      localStorage.setItem("selectedShippingId", r.value);
+    });
+  });
+
+  back.addEventListener("click", () => {
+    window.location.href = "step1.html";
+  });
+
+  next.addEventListener("click", () => {
+    const picked = document.querySelector(`input[name="shipment"]:checked`);
+    if (!picked) {
+      alert("Lütfen bir shipment method seç.");
+      return;
+    }
+    localStorage.setItem("selectedShippingId", picked.value);
+    window.location.href = "Step3.html";
+  });
+}
+
 function initStep3PaymentPage() {
   const back = document.getElementById("step3Back");
   const pay = document.getElementById("step3Pay");
-  if (!back || !pay) return; // Step3 değilse çık
+  if (!back || !pay) return;
 
   back.addEventListener("click", () => {
     window.location.href = "Step2.html";
   });
 
   pay.addEventListener("click", () => {
-    
     alert("Ödeme başarılı ✅");
-   
   });
 }
-function setText(id, value) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = value ?? "-";
+
+/* =========================
+   10) Boot
+========================= */
+// ✅ Sayfa algılama helper'ı
+function has(id) {
+  return !!document.getElementById(id);
 }
 
-function renderDetailsSection(p) {
-  setText("pdDetailsText", p.description || "");
-
-  setText("pdSpec1", p.brand || "-");
-  setText("pdSpec2", p.category || "-");
-  setText("pdSpec3", (p.rating ?? "-").toString());
-  setText("pdSpec4", Number(p.stock || 0) > 0 ? `${p.stock} pcs` : "Out of stock");
-  setText("pdSpec5", `$${p.price}`);
-
-  const extra = document.getElementById("pdExtraList");
-  if (extra) {
-    const tags = Array.isArray(p.tags) ? p.tags : [];
-    extra.innerHTML = tags.length
-      ? tags.map(t => `<p style="font-size: 15px;color: black;font-weight: bold;margin: 0px;">${String(t)}</p>`).join("")
-      : `<p style="font-size: 15px;color: black;font-weight: bold;margin: 0px;">-</p>`;
-  }
-
-  setText("pdCpu1", p.warrantyInformation || "-");
-  setText("pdCpu2", p.shippingInformation || "-");
-}
-function setupCommentsToggle() {
-  const root = document.getElementById("commentsRoot");
-  const btn = document.getElementById("commentsToggleBtn");
-  if (!root || !btn) return;
-
-  btn.addEventListener("click", () => {
-    const opened = root.classList.toggle("expanded");
-    btn.textContent = opened ? "View less" : "View more";
-  });
-}
-document.addEventListener("click", (e) => {
-  const btn = e.target.closest(".shopNowBtn");
-  if (!btn) return;
-
-  const category = btn.dataset.category || "beauty";
-  window.location.href = `ProductPage.html?category=${encodeURIComponent(category)}`;
-});
-document.addEventListener("DOMContentLoaded", async () => {
+function initGlobal() {
   setupBurgerMenu();
   setupLoginModal();
   setupClicks();
+  updateCartBadge();
+}
 
-  setupCheckoutBtn();
+async function initHomePage() {
+  await renderAll();
+}
+
+async function initProductPage() {
+  await renderAll();
+}
+
+async function initProductDetailsPage() {
+  await renderProductDetails();
+}
+
+async function initCartPage() {
   await renderCartPage();
+  setupCheckoutBtn();
+}
+
+function initStep1Page() {
+  seedAddressesIfEmpty();
+  renderAddresses();
+  bindAddressActionsOnce();
+  bindStep1Nav();
+}
+
+function initStep2Page() {
+  initStep2ShippingPage();
+}
+
+function initStep3Page() {
+  initStep3PaymentPage();
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+  initGlobal();
 
   try {
-    await renderAll();
-    await renderProductDetails();
+    if (has("mainBanner") || has("productsGrid") || has("discountGrid")) {
+      await initHomePage();
+    }
+
+    if (has("productPageGrid") || has("brandFilters")) {
+      await initProductPage();
+    }
+
+    if (has("productDetailsRoot")) {
+      await initProductDetailsPage();
+    }
+
+    if (has("cartList")) {
+      await initCartPage();
+    }
+
+    if (has("addressList")) {
+      initStep1Page();
+    }
+
+    if (has("step2Back")) {
+      initStep2Page();
+    }
+
+    if (has("step3Back")) {
+      initStep3Page();
+    }
   } catch (e) {
-    console.error(e);
+    console.error("Init error:", e);
   }
-
-  
-  if (document.getElementById("addressList")) {
-    seedAddressesIfEmpty();
-    renderAddresses();
-    bindAddressActionsOnce();
-    bindStep1Nav();
-  }
-
-  
-  initStep2ShippingPage();
-  initStep3PaymentPage();
 });
