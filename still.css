@@ -1033,8 +1033,6 @@ border-radius: 8px;
 .productPageFiltersMobileRewiews{
   width: 344px ;
   height: 580px;
- 
-    height: 580px ;
     flex-direction: column;
     display: flex;
     margin-top: 80px
@@ -1644,13 +1642,7 @@ border: 1px solid #d7d7db;
   height: 2px;
   background: #111;
 }
-.Step3CardPlaceHolders{
-  width: 100%;                 
-  min-height: 176px;                 
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
+
 .Step3CardPlaceHolders{
   width: 100%;
   max-width: 341px;      
@@ -1750,11 +1742,10 @@ border: 1px solid #d7d7db;
 #bannerBottomGrid{
   display: grid;
   gap: 16px;
-}
-
-#bannerBottomGrid{
   grid-template-columns: 1fr;
 }
+
+
 #CategoriesGrid{
   width: 100%;
   display: flex;
@@ -2213,7 +2204,6 @@ input[type="submit"]:active{
     width: 100%;
     display: flex ;
     justify-content: flex-start;
-    align-items: space-between;
     margin-left: 260px  ;
     margin-bottom: 260px;
     gap: 16px;
@@ -2250,16 +2240,6 @@ input[type="submit"]:active{
     align-items: center;
     justify-content: flex-start;
     gap: 32px;
-  }
-.productPageDetailsMobileText{
-    width: 536px ;
-    height: auto ;
-    margin-top: 80px;
-    flex-direction: column;
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    gap: 16px;
   }
   
   .imageFilters{
@@ -2568,7 +2548,7 @@ input[type="submit"]:active{
     max-width: 1120px;
     margin: 192px auto 0;
     display: flex;
-    align-items: space-between;
+    
   }
 
 .step1Content{
@@ -2689,21 +2669,17 @@ input[type="submit"]:active{
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
   }
-  #bigBannerWrapperGrid .bigBanner-desktop-only{ display: none !important; }
-  #bigBannerWrapperGrid .bigBanner-mobile-visible{ display: flex !important; }
+ 
 
 #bigBannerWrapperGrid{
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+   grid-template-columns: repeat(4, 1fr);
     gap: 24px;
   }
 
   #bigBannerWrapperGrid .bigBanner-desktop-only{ display: flex !important; }
   #bigBannerWrapperGrid .bigBanner-mobile-visible{ display: none !important; }
 
-#bigBannerWrapperGrid{
-    grid-template-columns: repeat(4, 1fr);
-  }
 
    #productPageGrid{
     display: grid;

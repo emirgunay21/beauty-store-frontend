@@ -25,13 +25,13 @@ function buildStarsHTML(rating, size = 24) {
 
   let html = "";
   for (let i = 0; i < full; i++) {
-    html += `<img src="Star 1.png" style="width:${size}px;height:${size}px;" alt="star">`;
+    html += `<img src="images/Star 1.png" style="width:${size}px;height:${size}px;" alt="star">`;
   }
   if (half) {
-    html += `<img src="Star 5.png" style="width:${size}px;height:${size}px;" alt="half">`;
+    html += `<img src="images/Star 5.png" style="width:${size}px;height:${size}px;" alt="half">`;
   }
   for (let i = 0; i < empty; i++) {
-    html += `<img src="Starempty.png" style="width:${size}px;height:${size}px;" alt="empty">`;
+    html += `<img src="images/Starempty.png" style="width:${size}px;height:${size}px;" alt="empty">`;
   }
   return html;
 }
@@ -225,12 +225,12 @@ function setupLoginModal() {
     if (user?.email) {
       navUser.innerHTML = `
         <span style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
-          <img src="User.png" style="width:24px;height:24px;" alt="User">
+          <img src="images/User.png" style="width:24px;height:24px;" alt="User">
           <span style="font-size:14px;color:#111;">${user.email}</span>
         </span>
       `;
     } else {
-      navUser.innerHTML = `<img src="User.png" style="width:24px;height:24px;cursor:pointer;" alt="User">`;
+      navUser.innerHTML = `<img src="images/User.png" style="width:24px;height:24px;cursor:pointer;" alt="User">`;
     }
   }
 
@@ -252,7 +252,7 @@ function setupLoginModal() {
 
       if (mobileMenu && mobileMenu.classList.contains("open")) {
         mobileMenu.classList.remove("open");
-        overlay?.classList.remove("show");
+       overlay?.classList.remove("open");
         burgerBtn?.setAttribute("aria-expanded", "false");
         mobileMenu.setAttribute("aria-hidden", "true");
         document.body.style.overflow = "";
@@ -410,9 +410,9 @@ async function renderAll() {
     async function getCategoryIcon(slug) {
       try {
         const d = await getJSON(`https://dummyjson.com/products/category/${slug}?limit=1`);
-        return d.products?.[0]?.thumbnail || "phoneicon.png";
+        return d.products?.[0]?.thumbnail || "images/phoneicon.png";
       } catch {
-        return "phoneicon.png";
+        return "images/phoneicon.png";
       }
     }
 
@@ -944,11 +944,11 @@ async function renderProductDetails() {
 
       bc.innerHTML = `
         <p style="color:#A4A4A4;cursor:pointer;" data-bc="home">Home</p>
-        <img src="Arrowright.png" alt="">
+        <img src="images/Arrowright.png" alt="">
         <p style="color:#A4A4A4;cursor:pointer;" data-bc="catalog">Catalog</p>
-        <img src="Arrowright.png" alt="">
+        <img src="images/Arrowright.png" alt="">
         <p style="color:#A4A4A4;cursor:pointer;" data-bc="category">${catText}</p>
-        <img src="Arrowright.png" alt="">
+        <img src="images/Arrowright.png" alt="">
         <p>${title}</p>
       `;
 
@@ -978,25 +978,25 @@ async function renderProductDetails() {
     const sendBtn = document.getElementById("commentSubmit");
 
     const beautyComments = [
-      { name: "Grace Carey", stars: 4.5, text: "Texture is smooth and lightweight. Blends easily and looks natural all day. Great for daily makeup.", pics: [], avatar: "gracepic.png" },
-      { name: "Ronald Richards", stars: 5, text: "Nice packaging and the scent is pleasant (not too strong). Good value for the price.", pics: [], avatar: "ronaldpic.png" },
-      { name: "Darcy King", stars: 4, text: "Color payoff is good, but I’d recommend moisturizing first. Overall I’m happy with it.", pics: [], avatar: "darcypic.png" },
+      { name: "Grace Carey", stars: 4.5, text: "Texture is smooth and lightweight. Blends easily and looks natural all day. Great for daily makeup.", pics: [], avatar: "images/gracepic.png" },
+      { name: "Ronald Richards", stars: 5, text: "Nice packaging and the scent is pleasant (not too strong). Good value for the price.", pics: [], avatar: "images/ronaldpic.png" },
+      { name: "Darcy King", stars: 4, text: "Color payoff is good, but I’d recommend moisturizing first. Overall I’m happy with it.", pics: [], avatar: "images/darcypic.png" },
     ];
 
     const phoneComments = [
-      { name: "Grace Carey", stars: 4.5, text: "Fast delivery and the device looks great. Performance is solid and battery lasts long.", pics: [], avatar: "gracepic.png" },
-      { name: "Ronald Richards", stars: 5, text: "Storage is great and the build feels premium. Highly recommended.", pics: [], avatar: "ronaldpic.png" },
-      { name: "Darcy King", stars: 4, text: "Camera quality is good, but low-light could be better. Still a nice purchase.", pics: [], avatar: "darcypic.png" },
+      { name: "Grace Carey", stars: 4.5, text: "Fast delivery and the device looks great. Performance is solid and battery lasts long.", pics: [], avatar: "images/gracepic.png" },
+      { name: "Ronald Richards", stars: 5, text: "Storage is great and the build feels premium. Highly recommended.", pics: [], avatar: "images/ronaldpic.png" },
+      { name: "Darcy King", stars: 4, text: "Camera quality is good, but low-light could be better. Still a nice purchase.", pics: [], avatar: "images/darcypic.png" },
     ];
 
     const seedList = isBeauty ? beautyComments : phoneComments;
 
     function pickFallbackAvatar(name) {
       const n = String(name || "").toLowerCase();
-      if (n.includes("grace")) return "gracepic.png";
-      if (n.includes("ronald")) return "ronaldpic.png";
-      if (n.includes("darcy")) return "darcypic.png";
-      return "User.png";
+      if (n.includes("grace")) return "images/gracepic.png";
+      if (n.includes("ronald")) return "images/ronaldpic.png";
+      if (n.includes("darcy")) return "images/darcypic.png";
+      return "images/User.png";
     }
 
     function renderComments(listToRender) {
@@ -1066,7 +1066,7 @@ async function renderProductDetails() {
           stars,
           text,
           pics: [],
-          avatar: "User.png",
+          avatar: "images/User.png",
         });
 
         writeComments(String(p.id), storedNow);
@@ -1160,7 +1160,7 @@ async function renderCartPage() {
     .map((item) => {
       const p = byId.get(Number(item.id));
       const title = p?.title || "Product";
-      const thumb = p?.thumbnail || "placeholder.png";
+      const thumb = p?.thumbnail || "images/placeholder.png";
       const price = Number(p?.price || 0);
       const qty = Number(item.qty || 0);
 
@@ -1282,7 +1282,7 @@ function renderAddresses() {
         <div class="step1SelectAdressBlockHomeRadio">
           <input type="radio" name="address" ${a.id === selectedId ? "checked" : ""}>
           <p style="margin:0px;font-size:16px;font-weight:bold;">${a.title}</p>
-          <img src="Tag.png" style="width:51px;height:22px;margin-left:8px;" alt="${a.tag}">
+          <img src="images/Tag.png" style="width:51px;height:22px;margin-left:8px;" alt="${a.tag}">
         </div>
 
         <div class="step1SelectAdressBlockHomeText">
@@ -1292,8 +1292,8 @@ function renderAddresses() {
       </div>
 
       <div class="step1SelectAdressBlockHomeicons">
-        <img class="addrEdit" src="To edit.png" style="width:24px;height:24px;margin-right:16px;cursor:pointer;" alt="edit">
-        <img class="addrDelete" src="Close.png" style="width:24px;height:24px;cursor:pointer;" alt="delete">
+        <img class="addrEdit" src="images/To edit.png" style="width:24px;height:24px;margin-right:16px;cursor:pointer;" alt="edit">
+        <img class="addrDelete" src="images/Close.png" style="width:24px;height:24px;cursor:pointer;" alt="delete">
       </div>
     </div>
   `
