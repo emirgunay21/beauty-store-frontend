@@ -294,6 +294,9 @@ function setupLoginModal() {
 /* =========================
    4) Home / Catalog Rendering
 ========================= */
+
+
+
 async function renderAll() {
   updateCartBadge();
 

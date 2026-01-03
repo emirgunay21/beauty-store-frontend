@@ -1905,7 +1905,7 @@ input[type="submit"]:active{
 
 
 #productPageGrid > *{
-  min-width: 0; /* taşmayı keser */
+  min-width: 0; 
 }
 .cartProductsScroll{
   width: 100%;
@@ -1913,22 +1913,23 @@ input[type="submit"]:active{
   flex-direction: column;
   gap: 16px;
 
-  /* ✅ 1 ürün varken uzamasın */
+ 
   height: auto;
   max-height: none;
   overflow: visible;
   padding-right: 0;
 }
 
-/* ✅ ürün çoksa scroll aç */
+
 .cartProductsScroll.is-scroll{
-  max-height: 420px;   /* mobil */
+  max-height: 420px;   
   overflow-y: auto;
   padding-right: 6px;
 }
 .mobile-menu-links a.active{
   font-weight: 600;
 }
+
 @media (min-width: 1024px) {
   
   .banner{
