@@ -1283,7 +1283,7 @@ function renderAddresses() {
     <div class="step1SelectAdressBlockHome" data-id="${a.id}">
       <div class="step1SelectAdressBlockHomeTop">
         <div class="step1SelectAdressBlockHomeRadio">
-          <input type="radio" name="address" ${a.id === selectedId ? "checked" : ""}>
+        <input type="radio" name="address" value="${a.id}" ${a.id === selectedId ? "checked" : ""}>
           <p style="margin:0px;font-size:16px;font-weight:bold;">${a.title}</p>
           <img src="images/Tag.png" style="width:51px;height:22px;margin-left:8px;" alt="${a.tag}">
         </div>
@@ -1342,7 +1342,8 @@ function bindAddressActionsOnce() {
 
     const id = card.dataset.id;
     if (!id) return;
-
+   localStorage.setItem(LS_SELECTED, id);
+  renderAddresses();
     if (e.target.classList.contains("addrDelete")) {
       let list = readAddresses().filter((a) => a.id !== id);
       writeAddresses(list);
@@ -1526,7 +1527,105 @@ function initStep3PaymentPage() {
     alert("Ödeme başarılı ✅");
   });
 }
+function money(n) {
+  const x = Number(n) || 0;
+  return `$${x.toFixed(0)}`;
+}
 
+function setPaymentTotals(subtotal) {
+  const tax = Math.round(subtotal * 0.02);     
+  const ship = subtotal > 0 ? 29 : 0;          
+  const total = subtotal + tax + ship;
+
+  const subEl = document.getElementById("paymentSubtotal");
+  const taxEl = document.getElementById("paymentTax");
+  const shipEl = document.getElementById("paymentShip");
+  const totalEl = document.getElementById("paymentTotal");
+
+  if (subEl) subEl.textContent = money(subtotal);
+  if (taxEl) taxEl.textContent = money(tax);
+  if (shipEl) shipEl.textContent = money(ship);
+  if (totalEl) totalEl.textContent = money(total);
+}
+
+async function renderPaymentSummary() {
+  const wrap = document.getElementById("paymentSummaryItems");
+  if (!wrap) return; 
+
+  const cart = readCart();
+  if (!cart.length) {
+    wrap.innerHTML = `<p style="padding:12px;color:#6C6C6C;">Sepet boş</p>`;
+    setPaymentTotals(0);
+    return;
+  }
+
+  const ids = [...new Set(cart.map(i => Number(i.id)).filter(Boolean))];
+  const products = await Promise.all(
+    ids.map(id => getJSON(`https://dummyjson.com/products/${id}`).catch(() => null))
+  );
+  const byId = new Map(products.filter(Boolean).map(p => [Number(p.id), p]));
+
+  let subtotal = 0;
+
+  wrap.innerHTML = cart.map(item => {
+    const p = byId.get(Number(item.id));
+    if (!p) return "";
+
+    const qty = Number(item.qty) || 1;
+    const price = Number(p.price) || 0;
+    const line = price * qty;
+    subtotal += line;
+
+    const thumb = p.thumbnail || (p.images && p.images[0]) || "";
+
+    return `
+      <div class="Step3SummaryItem" style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #E7E7E7;border-radius:10px;margin-bottom:10px;">
+        <img src="${thumb}" alt="${p.title}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;">
+        <div style="flex:1;">
+          <div style="font-size:12px;font-weight:600;">${p.title}</div>
+          <div style="font-size:12px;color:#6C6C6C;">x${qty}</div>
+        </div>
+        <div style="font-size:12px;font-weight:700;">${money(line)}</div>
+      </div>
+    `;
+  }).join("");
+
+  setPaymentTotals(subtotal);
+
+  // (opsiyonel) Step1 seçilen adres / Step2 seçilen kargo yazıları
+  const addresses = JSON.parse(localStorage.getItem("addresses") || "[]");
+const selectedAddressId = localStorage.getItem("selectedAddressId");
+const chosen = addresses.find(a => String(a.id) === String(selectedAddressId));
+
+const addrEl = document.getElementById("paymentAddressText");
+if (addrEl) addrEl.textContent = chosen ? chosen.line : "-";
+
+  const selectedShippingId = localStorage.getItem("selectedShippingId");
+  const shipEl = document.getElementById("paymentShippingText");
+  if (shipEl && selectedShippingId) shipEl.textContent = selectedShippingId; 
+}
+function renderPaymentAddressAndShipping() {
+  const addressEl = document.getElementById("paymentAddressText");
+  const shipEl = document.getElementById("paymentShippingText");
+  if (!addressEl || !shipEl) return;
+
+  
+  const addresses = JSON.parse(localStorage.getItem("addresses") || "[]");
+  const selectedAddressId = localStorage.getItem("selectedAddressId");
+
+  const addr = addresses.find(a => String(a.id) === String(selectedAddressId));
+
+  addressEl.textContent = addr
+    ? addr.line
+    : "-";
+
+  // Shipping
+  const selectedShippingId =
+    localStorage.getItem("selectedShippingId") ||
+    localStorage.getItem("selectedShipping");
+
+  shipEl.textContent = selectedShippingId || "-";
+}
 /* =========================
    10) Boot
 ========================= */
@@ -1572,6 +1671,8 @@ function initStep2Page() {
 
 function initStep3Page() {
   initStep3PaymentPage();
+  renderPaymentSummary();
+  renderPaymentAddressAndShipping();
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

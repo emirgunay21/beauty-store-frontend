@@ -110,6 +110,26 @@
 
 </div>
 <div class="Step3Card">
+  <div class="Step3CardSummary">
+  <h2 style="margin-top:0px;">Summary</h2>
+
+  <div id="paymentSummaryItems"></div>
+
+  <div class="Step3SummaryAddress">
+    <p style="margin:0;font-size:12px;color:#6C6C6C;">Address</p>
+    <p id="paymentAddressText" style="margin:6px 0 0 0;font-size:12px;">-</p>
+
+    <p style="margin:16px 0 0 0;font-size:12px;color:#6C6C6C;">Shipment method</p>
+    <p id="paymentShippingText" style="margin:6px 0 0 0;font-size:12px;">-</p>
+  </div>
+
+  <div class="Step3SummaryTotals">
+    <div class="summaryRow"><span>Subtotal</span><span id="paymentSubtotal">$0</span></div>
+    <div class="summaryRow"><span>Estimated Tax</span><span id="paymentTax">$0</span></div>
+    <div class="summaryRow"><span>Estimated shipping & Handling</span><span id="paymentShip">$0</span></div>
+    <div class="summaryRow summaryTotal"><span>Total</span><span id="paymentTotal">$0</span></div>
+  </div>
+</div>
     <div class="Step3Card-Details">
         <h2 style="margin-top:0px;">Payment </h2>
         <div class="Step3Card-Left-Options">
@@ -133,15 +153,17 @@
     <input type="text" placeholder="CVV" class="Step3Card-input-small">
   </div>
 </div>
-</div>
+
 <div class="Step3CardcheckBox">
   <input type="checkbox" id="saveinfo" name="saveinfo">
   <label for="saveinfo" class="Step3Card-checkLabel">Same as billing address</label>
 </div>
+
 <div class="step1ContentButtons">
     <button class="step1ContentButtonsBack" id="step3Back" type="button">Back</button>
 <button class="step1ContentButtonsNext" id="step3Pay" type="button">Pay</button>
 
+</div>
 </div>
 </div>
 <div class="footer">
