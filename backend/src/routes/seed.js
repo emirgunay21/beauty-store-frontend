@@ -13,7 +13,8 @@ router.get("/products", async (req, res) => {
     }
 
     // 1) dummyjson'dan çek
-    const url = `https://dummyjson.com/products/category/${encodeURIComponent(category)}`;
+    const url = `https://dummyjson.com/products/category/${encodeURIComponent(category)}?limit=30`;
+
     const { data } = await axios.get(url);
     const items = data.products || [];
 

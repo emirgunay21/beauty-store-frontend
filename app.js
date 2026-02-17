@@ -1,4 +1,5 @@
 "use strict";
+const API_BASE = "http://localhost:3001";
 
 /* =========================
    1) Core Helpers
@@ -308,11 +309,14 @@ async function renderAll() {
   const mainBanner = document.getElementById("mainBanner");
   const productPageGrid = document.getElementById("productPageGrid");
 
-  if (productsGrid) {
-    const data = await getJSON("https://dummyjson.com/products?limit=8");
-    productsGrid.innerHTML = data.products
-      .map(
-        (p) => `
+ if (productsGrid) {
+  const data = await getJSON(`${API_BASE}/products?limit=8&skip=0`);
+
+  const list = data.products || data.items || [];
+
+  productsGrid.innerHTML = list
+    .map(
+      (p) => `
       <div class="productItems">
         <div class="productItemiphone14Pro">
           <img src="${p.thumbnail}" style="width:104px;height:104px;" alt="${p.title}">
@@ -329,15 +333,20 @@ async function renderAll() {
         </div>
       </div>
     `
-      )
-      .join("");
-  }
+    )
+    .join("");
+}
+
 
   if (discountGrid) {
-    const data2 = await getJSON("https://dummyjson.com/products?limit=4&skip=8");
-    discountGrid.innerHTML = data2.products
-      .map(
-        (p) => `
+  const data2 = await getJSON(`${API_BASE}/products?limit=4&skip=8`);
+
+
+  const list2 = data2.products || data2.items || [];
+
+  discountGrid.innerHTML = list2
+    .map(
+      (p) => `
       <div class="DiscountitemTopiphoneGold">
         <img src="${p.thumbnail}" style="width:104px;height:104px;" alt="${p.title}">
         <h2 style="font-size:18px;color:black;overflow-wrap:break-word;margin-left:12px;">
@@ -352,13 +361,15 @@ async function renderAll() {
         </button>
       </div>
     `
-      )
-      .join("");
-  }
+    )
+    .join("");
+}
+
 
   if (bannerBottomGrid) {
-    const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=4");
-    const p = data.products || [];
+    const data = await getJSON(`${API_BASE}/products?category=beauty&limit=4&skip=0`);
+const p = data.products || data.items || [];
+
     bannerBottomGrid.innerHTML = `
       <div class="bannerBottomAirPodsMax">
         <img src="${p[0]?.thumbnail || ""}" style="width:192px;height:200px;margin-top:40px">
@@ -404,16 +415,23 @@ async function renderAll() {
       categoriesGrid.dataset.bound = "1";
     }
 
-    const data3 = await getJSON("https://dummyjson.com/products/categories");
-    const normalize = (c) => (typeof c === "string" ? { slug: c, name: c } : { slug: c.slug || c.name || "", name: c.name || c.slug || "" });
+    const all = [
+  { slug: "beauty", name: "beauty" },
+  { slug: "fragrances", name: "fragrances" },
+  { slug: "skin-care", name: "skin-care" },
+  { slug: "sunglasses", name: "sunglasses" },
+  { slug: "womens-bags", name: "womens-bags" },
+  { slug: "womens-jewellery", name: "womens-jewellery" },
+];
 
-    const all = data3.map(normalize);
     const wantedSlugs = ["beauty", "fragrances", "skin-care", "sunglasses", "womens-bags", "womens-jewellery"];
 
     async function getCategoryIcon(slug) {
       try {
-        const d = await getJSON(`https://dummyjson.com/products/category/${slug}?limit=1`);
-        return d.products?.[0]?.thumbnail || "images/phoneicon.png";
+        const d = await getJSON(`${API_BASE}/products?category=${encodeURIComponent(slug)}&limit=1&skip=0`);
+
+        return (d.products || d.items || [])[0]?.thumbnail || "images/phoneicon.png";
+
       } catch {
         return "images/phoneicon.png";
       }
@@ -452,8 +470,9 @@ async function renderAll() {
   }
 
   if (bigBannerWrapperGrid) {
-    const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=4");
-    const p = data.products || [];
+    const data = await getJSON(`${API_BASE}/products?category=beauty&limit=4&skip=0`);
+const p = data.products || data.items || [];
+
     while (p.length < 4) p.push({ title: "Product", description: "", thumbnail: "" });
 
     bigBannerWrapperGrid.innerHTML = `
@@ -520,8 +539,9 @@ async function renderAll() {
   }
 
   if (mainBanner) {
-    const data = await getJSON("https://dummyjson.com/products/category/beauty?limit=1");
-    const p = data.products?.[0];
+    const data = await getJSON(`${API_BASE}/products?category=beauty&limit=1&skip=0`);
+const p = (data.products || data.items || [])[0];
+
 
     mainBanner.innerHTML = `
       <div class="bannerTop">
@@ -537,7 +557,8 @@ async function renderAll() {
 
       <div class="bannerTopimage">
         <picture>
-          <source media="(min-width:1024px)" srcset="${p?.images?.[0] || p?.thumbnail || ""}">
+          <source media="(min-width:1024px)" srcset="${p?.thumbnail || ""}">
+
           <img src="${p?.thumbnail || ""}" alt="${p?.title || "Beauty product"}">
         </picture>
       </div>
@@ -549,8 +570,9 @@ async function renderAll() {
       const urlParams = new URLSearchParams(window.location.search);
       const category = urlParams.get("category") || "Beauty";
 
-      const data = await getJSON(`https://dummyjson.com/products/category/${encodeURIComponent(category)}?limit=12`);
-      const products = data.products || [];
+     const data = await getJSON(`${API_BASE}/products?category=${encodeURIComponent(category)}&limit=12&skip=0`);
+const products = data.products || data.items || [];
+
 
       buildBrandFilters(products);
       PRODUCTPAGE_ALL = products;
@@ -775,8 +797,9 @@ async function renderRelatedProducts(p) {
       return;
     }
 
-    const data = await getJSON(`https://dummyjson.com/products/category/${cat}?limit=12`);
-    let list = (data.products || []).filter((x) => Number(x.id) !== Number(p.id));
+    const data = await getJSON(`${API_BASE}/products?category=${cat}&limit=12&skip=0`);
+let list = (data.products || data.items || []).filter((x) => Number(x.id) !== Number(p.id));
+
     list = list.slice(0, 4);
 
     let html = "";
@@ -834,10 +857,15 @@ async function renderProductDetails() {
   }
 
   try {
-    const p = await getJSON(`https://dummyjson.com/products/${encodeURIComponent(id)}`);
+   const data = await getJSON(`${API_BASE}/products/${encodeURIComponent(id)}`);
+const p = data.product;
+
+
+
     await renderRelatedProducts(p);
 
-    const thumbs = (p.images || []).slice(0, 4);
+    const thumbs = [p.thumbnail].filter(Boolean);
+
 
     const catLower = String(p.category || "").toLowerCase();
     const isBeauty = ["beauty", "fragrances", "skin-care"].includes(catLower);
@@ -1154,7 +1182,10 @@ async function renderCartPage() {
   }
 
   const ids = [...new Set(cart.map((i) => Number(i.id)).filter(Boolean))];
-  const products = await Promise.all(ids.map((id) => getJSON(`https://dummyjson.com/products/${id}`).catch(() => null)));
+  const products = await Promise.all(
+  ids.map((id) => getJSON(`${API_BASE}/products/${id}`).then(r => r.product).catch(() => null))
+);
+
   const byId = new Map(products.filter(Boolean).map((p) => [Number(p.id), p]));
 
   let subtotal = 0;
@@ -1561,7 +1592,8 @@ async function renderPaymentSummary() {
 
   const ids = [...new Set(cart.map(i => Number(i.id)).filter(Boolean))];
   const products = await Promise.all(
-    ids.map(id => getJSON(`https://dummyjson.com/products/${id}`).catch(() => null))
+    ids.map(id => getJSON(`${API_BASE}/products/${id}`).then(r => r.product).catch(() => null))
+
   );
   const byId = new Map(products.filter(Boolean).map(p => [Number(p.id), p]));
 
@@ -1576,7 +1608,8 @@ async function renderPaymentSummary() {
     const line = price * qty;
     subtotal += line;
 
-    const thumb = p.thumbnail || (p.images && p.images[0]) || "";
+    const thumb = p.thumbnail || "";
+
 
     return `
       <div class="Step3SummaryItem" style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid #E7E7E7;border-radius:10px;margin-bottom:10px;">
